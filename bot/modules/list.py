@@ -29,25 +29,25 @@ def select_type(update, context):
     data = query.data
     data = data.split(" ")
     if user_id != int(data[1]):
-        query.answer(text="Not Yours!", show_alert=True)
+        query.answer(text="Bukan Buat Kamu MAS!", show_alert=True)
     elif data[2] in ["root", "recu"]:
         query.answer()
         buttons = button_build.ButtonMaker()
         buttons.sbutton("Folders", f"types {user_id} folders {data[2]}")
         buttons.sbutton("Files", f"types {user_id} files {data[2]}")
-        buttons.sbutton("Both", f"types {user_id} both {data[2]}")
-        buttons.sbutton("Cancel", f"types {user_id} cancel")
+        buttons.sbutton("Keduanya", f"types {user_id} both {data[2]}")
+        buttons.sbutton("Batalkan", f"types {user_id} cancel")
         button = InlineKeyboardMarkup(buttons.build_menu(2))
-        editMessage('Choose option to list.', msg, button)
+        editMessage('Pilih Opsi untuk di list.', msg, button)
     elif data[2] in ["files", "folders", "both"]:
         query.answer()
         list_method = data[3]
         item_type = data[2]
-        editMessage(f"<b>Searching for <i>{key}</i></b>", msg)
+        editMessage(f"<b>Mencari Untuk: <i>{key}</i></b>", msg)
         list_drive(key, msg, list_method, item_type)
     else:
         query.answer()
-        editMessage("list has been canceled!", msg)
+        editMessage("list Telah Dibatalkan!", msg)
 
 
 def list_drive(key, bmsg, list_method, item_type):
@@ -58,7 +58,7 @@ def list_drive(key, bmsg, list_method, item_type):
     if button:
         editMessage(msg, bmsg, button)
     else:
-        editMessage(f'No result found for <i>{key}</i>', bmsg)
+        editMessage(f'Tidak ada hasil untuk <i>{key}</i>', bmsg)
 
 
 list_handler = CommandHandler(BotCommands.ListCommand, list_buttons, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
