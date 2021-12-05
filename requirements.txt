@@ -11,10 +11,12 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 heroku3
+html-telegraph-poster
 gunicorn
 Js2Py
 https://github.com/jusidama18/lk21/archive/refs/heads/main.zip
 lxml
+https://github.com/trp07/messages/archive/refs/heads/master.zip
 Pillow
 py-kraken
 psutil
