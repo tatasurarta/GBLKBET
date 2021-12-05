@@ -2,24 +2,32 @@ import logging
 import os
 import threading
 import time
+import random
+import string
 import subprocess
 import requests
-import socket
-import faulthandler
+import json
+
 import aria2p
-import psycopg2
 import qbittorrentapi as qba
 import telegram.ext as tg
-
-from pyrogram import Client
-from psycopg2 import Error
 from dotenv import load_dotenv
+from pyrogram import Client
+from telegraph import Telegraph
 
+import psycopg2
+from psycopg2 import Error
+
+import socket
+import faulthandler
 faulthandler.enable()
 
 socket.setdefaulttimeout(600)
 
 botStartTime = time.time()
+if os.path.exists('log.txt'):
+    with open('log.txt', 'r+') as f:
+        f.truncate(0)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[logging.FileHandler('log.txt'), logging.StreamHandler()],
@@ -27,6 +35,25 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 LOGGER = logging.getLogger(__name__)
 
+NETRC_FILE_URL = os.environ.get('NETRC_FILE_URL', None)
+if NETRC_FILE_URL is not None:
+    res = requests.get(NETRC_FILE_URL)
+    if res.status_code == 200:
+        with open('.netrc', 'wb+') as f:
+            f.write(res.content)
+            f.close()
+    else:
+        logging.error(res.status_code)
+
+CONFIG_FILE_URL = os.environ.get('CONFIG_FILE_URL', None)
+if CONFIG_FILE_URL is not None:
+    res = requests.get(CONFIG_FILE_URL)
+    if res.status_code == 200:
+        with open('config.env', 'wb+') as f:
+            f.write(res.content)
+            f.close()
+    else:
+        logging.error(res.status_code)
 
 load_dotenv('config.env', override=True)
 
@@ -56,13 +83,15 @@ try:
         raise KeyError
 except KeyError:
     SERVER_PORT = 80
-
+    
 PORT = os.environ.get('PORT', SERVER_PORT)
 web = subprocess.Popen([f"gunicorn wserver:start_server --bind 0.0.0.0:{PORT} --worker-class aiohttp.GunicornWebWorker"], shell=True)
 alive = subprocess.Popen(["python3", "alive.py"])
 nox = subprocess.Popen(["qbittorrent-nox", "--profile=."])
 if not os.path.exists('.netrc'):
     subprocess.run(["touch", ".netrc"])
+subprocess.run(["mkdir", "-p", "qBittorrent/config"])
+subprocess.run(["cp", "qBittorrent.conf", "qBittorrent/config/qBittorrent.conf"])
 subprocess.run(["chmod", "600", ".netrc"])
 subprocess.run(["chmod", "+x", "aria.sh"])
 subprocess.run(["./aria.sh"], shell=True)
@@ -72,6 +101,9 @@ Interval = []
 DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
+
+def getConfig(name: str):
+    return os.environ[name]
 
 def mktable():
     try:
@@ -100,8 +132,16 @@ aria2 = aria2p.API(
     )
 )
 
+
 def get_client() -> qba.TorrentsAPIMixIn:
-    return qba.Client(host="localhost", port=8090)
+    qb_client = qba.Client(host="localhost", port=8090, username="admin", password="adminadmin")
+    try:
+        qb_client.auth_log_in()
+        #qb_client.application.set_preferences({"disk_cache":64, "incomplete_files_ext":True, "max_connec":3000, "max_connec_per_torrent":300, "async_io_threads":8, "preallocate_all":True, "upnp":True, "dl_limit":-1, "up_limit":-1, "dht":True, "pex":True, "lsd":True, "encryption":0, "queueing_enabled":True, "max_active_downloads":15, "max_active_torrents":50, "dont_count_slow_torrents":True, "bittorrent_protocol":0, "recheck_completed_torrents":True, "enable_multi_connections_from_same_ip":True, "slow_torrent_dl_rate_threshold":100,"slow_torrent_inactive_timer":600})
+        return qb_client
+    except qba.LoginFailed as e:
+        logging.error(str(e))
+        return None
 
 """
 trackers = subprocess.check_output(["curl -Ns https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt https://ngosang.github.io/trackerslist/trackers_all_http.txt https://newtrackon.com/api/all | awk '$0'"], shell=True).decode('utf-8')
@@ -111,19 +151,24 @@ trackerslist.remove("")
 trackerslist = "\n\n".join(trackerslist)
 get_client().application.set_preferences({"add_trackers":f"{trackerslist}"})
 """
-
+    
 
 DOWNLOAD_DIR = None
 BOT_TOKEN = None
+BOT_NO = ""
 
 download_dict_lock = threading.Lock()
 status_reply_dict_lock = threading.Lock()
+search_dict_lock = threading.Lock()
 # Key: update.effective_chat.id
 # Value: telegram.Message
 status_reply_dict = {}
 # Key: update.message.message_id
 # Value: An object of Status
 download_dict = {}
+# key: search_id
+# Value: client, search_results, total_results, total_pages, pageNo, start
+search_dict = {}
 # Stores list of users and chats the bot is authorized to use in
 AUTHORIZED_CHATS = set()
 SUDO_USERS = set()
@@ -152,9 +197,10 @@ try:
     for chats in schats:
         SUDO_USERS.add(int(chats))
 except:
-    pass
+    pass   
 try:
     BOT_TOKEN = getConfig('BOT_TOKEN')
+    CHAT_NAME = getConfig('CHAT_NAME')
     parent_id = getConfig('GDRIVE_FOLDER_ID')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
     if not DOWNLOAD_DIR.endswith("/"):
@@ -195,16 +241,23 @@ if DB_URI is not None:
         conn.close()
 
 LOGGER.info("Generating USER_SESSION_STRING")
-app = Client('pyrogram', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, workers=343)
+app = Client('Priiiiyo', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN)
+
+# Generate Telegraph Token
+sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
+LOGGER.info("Generating TELEGRAPH_TOKEN using '" + sname + "' name")
+telegraph = Telegraph()
+telegraph.create_account(short_name=sname)
+telegraph_token = telegraph.get_access_token()
 
 try:
     TG_SPLIT_SIZE = getConfig('TG_SPLIT_SIZE')
-    if len(TG_SPLIT_SIZE) == 0 or int(TG_SPLIT_SIZE) > 2097151000:
+    if len(TG_SPLIT_SIZE) == 0 or int(TG_SPLIT_SIZE) > 2097152000:
         raise KeyError
     else:
         TG_SPLIT_SIZE = int(TG_SPLIT_SIZE)
 except KeyError:
-    TG_SPLIT_SIZE = 2097151000
+    TG_SPLIT_SIZE = 2097152000
 try:
     STATUS_LIMIT = getConfig('STATUS_LIMIT')
     if len(STATUS_LIMIT) == 0:
@@ -215,8 +268,6 @@ except KeyError:
     STATUS_LIMIT = None
 try:
     MEGA_API_KEY = getConfig('MEGA_API_KEY')
-    if len(MEGA_API_KEY) == 0:
-        raise KeyError
 except KeyError:
     logging.warning('MEGA API KEY not provided!')
     MEGA_API_KEY = None
@@ -230,6 +281,15 @@ except KeyError:
     MEGA_EMAIL_ID = None
     MEGA_PASSWORD = None
 try:
+    HEROKU_API_KEY = getConfig('HEROKU_API_KEY')
+    HEROKU_APP_NAME = getConfig('HEROKU_APP_NAME')
+    if len(HEROKU_API_KEY) == 0 or len(HEROKU_APP_NAME) == 0:
+        HEROKU_API_KEY = None
+        HEROKU_APP_NAME = None
+except KeyError:
+    HEROKU_API_KEY = None
+    HEROKU_APP_NAME = None
+try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
     if len(UPTOBOX_TOKEN) == 0:
         raise KeyError
@@ -239,40 +299,29 @@ except KeyError:
 try:
     INDEX_URL = getConfig('INDEX_URL')
     if len(INDEX_URL) == 0:
-        raise KeyError
+        INDEX_URL = None
+        INDEX_URLS.append(None)
     else:
         INDEX_URLS.append(INDEX_URL)
 except KeyError:
     INDEX_URL = None
     INDEX_URLS.append(None)
 try:
-    SEARCH_API_LINK = getConfig('SEARCH_API_LINK')
-    if len(SEARCH_API_LINK) == 0:
-        raise KeyError
-except KeyError:
-    SEARCH_API_LINK = None
-try:
     TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
     if len(TORRENT_DIRECT_LIMIT) == 0:
-        raise KeyError
-    else:
-        TORRENT_DIRECT_LIMIT = float(TORRENT_DIRECT_LIMIT)
+        TORRENT_DIRECT_LIMIT = None
 except KeyError:
     TORRENT_DIRECT_LIMIT = None
 try:
     CLONE_LIMIT = getConfig('CLONE_LIMIT')
     if len(CLONE_LIMIT) == 0:
-        raise KeyError
-    else:
-        CLONE_LIMIT = float(CLONE_LIMIT)
+        CLONE_LIMIT = None
 except KeyError:
     CLONE_LIMIT = None
 try:
     MEGA_LIMIT = getConfig('MEGA_LIMIT')
     if len(MEGA_LIMIT) == 0:
-        raise KeyError
-    else:
-        MEGA_LIMIT = float(MEGA_LIMIT)
+        MEGA_LIMIT = None
 except KeyError:
     MEGA_LIMIT = None
 try:
@@ -283,6 +332,12 @@ try:
         ZIP_UNZIP_LIMIT = float(ZIP_UNZIP_LIMIT)
 except KeyError:
     ZIP_UNZIP_LIMIT = None
+try:
+    TAR_UNZIP_LIMIT = getConfig('TAR_UNZIP_LIMIT')
+    if len(TAR_UNZIP_LIMIT) == 0:
+        TAR_UNZIP_LIMIT = None
+except KeyError:
+    TAR_UNZIP_LIMIT = None
 try:
     BUTTON_FOUR_NAME = getConfig('BUTTON_FOUR_NAME')
     BUTTON_FOUR_URL = getConfig('BUTTON_FOUR_URL')
@@ -356,6 +411,13 @@ try:
 except KeyError:
     IGNORE_PENDING_REQUESTS = False
 try:
+    CHAT_ID = getConfig('CHAT_ID')
+    DELAY = int(getConfig('DELAY'))
+    INIT_FEEDS = getConfig('INIT_FEEDS')
+    CUSTOM_MESSAGES = getConfig('CUSTOM_MESSAGES')        
+except:
+    pass 
+try:
     BASE_URL = getConfig('BASE_URL_OF_BOT')
     if len(BASE_URL) == 0:
         raise KeyError
@@ -392,36 +454,37 @@ except KeyError:
     PHPSESSID = None
     CRYPT = None
 try:
+    RECURSIVE_SEARCH = getConfig('RECURSIVE_SEARCH')
+    RECURSIVE_SEARCH = RECURSIVE_SEARCH.lower() == 'true'
+except KeyError:
+    RECURSIVE_SEARCH = False
+try:
     TOKEN_PICKLE_URL = getConfig('TOKEN_PICKLE_URL')
     if len(TOKEN_PICKLE_URL) == 0:
-        raise KeyError
-    try:
+        TOKEN_PICKLE_URL = None
+    else:
         res = requests.get(TOKEN_PICKLE_URL)
         if res.status_code == 200:
             with open('token.pickle', 'wb+') as f:
                 f.write(res.content)
                 f.close()
         else:
-            logging.error(f"Failed to download token.pickle, link got HTTP response: {res.status_code}")
-    except Exception as e:
-        logging.error(str(e))
+            logging.error(res.status_code)
+            raise KeyError
 except KeyError:
     pass
 try:
     ACCOUNTS_ZIP_URL = getConfig('ACCOUNTS_ZIP_URL')
     if len(ACCOUNTS_ZIP_URL) == 0:
-        raise KeyError
+        ACCOUNTS_ZIP_URL = None
     else:
-        try:
-            res = requests.get(ACCOUNTS_ZIP_URL)
-            if res.status_code == 200:
-                with open('accounts.zip', 'wb+') as f:
-                    f.write(res.content)
-                    f.close()
-            else:
-                logging.error(f"Failed to download accounts.zip, link got HTTP response: {res.status_code}")
-        except Exception as e:
-            logging.error(str(e))
+        res = requests.get(ACCOUNTS_ZIP_URL)
+        if res.status_code == 200:
+            with open('accounts.zip', 'wb+') as f:
+                f.write(res.content)
+                f.close()
+        else:
+            logging.error(res.status_code)
             raise KeyError
         subprocess.run(["unzip", "-q", "-o", "accounts.zip"])
         os.remove("accounts.zip")
@@ -430,17 +493,16 @@ except KeyError:
 try:
     MULTI_SEARCH_URL = getConfig('MULTI_SEARCH_URL')
     if len(MULTI_SEARCH_URL) == 0:
-        raise KeyError
-    try:
+        MULTI_SEARCH_URL = None
+    else:
         res = requests.get(MULTI_SEARCH_URL)
         if res.status_code == 200:
             with open('drive_folder', 'wb+') as f:
                 f.write(res.content)
                 f.close()
         else:
-            logging.error(f"Failed to download drive_folder, link got HTTP response: {res.status_code}")
-    except Exception as e:
-        logging.error(str(e))
+            logging.error(res.status_code)
+            raise KeyError
 except KeyError:
     pass
 try:
@@ -476,8 +538,13 @@ if os.path.exists('drive_folder'):
                 INDEX_URLS.append(temp[2])
             except IndexError as e:
                 INDEX_URLS.append(None)
+                
+SEARCH_PLUGINS = os.environ.get('SEARCH_PLUGINS', None)
+if SEARCH_PLUGINS is not None:
+    SEARCH_PLUGINS = json.loads(SEARCH_PLUGINS)
+    qbclient = get_client()
+    qbclient.search_install_plugin(SEARCH_PLUGINS)               
 
-
-updater = tg.Updater(token=BOT_TOKEN, request_kwargs={'read_timeout': 30, 'connect_timeout': 15})
+updater = tg.Updater(token=BOT_TOKEN, request_kwargs={'read_timeout': 30, 'connect_timeout': 10})
 bot = updater.bot
 dispatcher = updater.dispatcher
