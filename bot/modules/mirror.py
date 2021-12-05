@@ -16,7 +16,7 @@ from requests.exceptions import RequestException
 
 from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
-                dispatcher, DOWNLOAD_DIR, download_dict, download_dict_lock, ZIP_UNZIP_LIMIT, TG_SPLIT_SIZE, LOGGER
+                dispatcher, DOWNLOAD_DIR, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, ZIP_UNZIP_LIMIT, TG_SPLIT_SIZE, LOGGER
 from bot.helper.ext_utils import fs_utils, bot_utils
 from bot.helper.ext_utils.shortenurl import short_url
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException, NotSupportedExtractionArchive
@@ -218,15 +218,19 @@ class MirrorListener(listeners.MirrorListeners):
             else:
                 uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
             count = len(files)
-            msg = f'<b>Name: </b><code>{link}</code>\n\n'
-            msg += f'<b>Total Files: </b>{count}'
-            if typ != 0:
-                msg += f'\n<b>Corrupted Files: </b>{typ}'
             if self.message.chat.type == 'private':
+                msg = f'<b>Nama File:</b> <code>{link}</code>\n'
+                msg += f'<b>Jumlah File: </b>{count}'
+                if typ != 0:
+                    msg += f'\n<b>File Rusak: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
             else:
                 chat_id = str(self.message.chat.id)[4:]
-                msg += f'\n<b>cc: </b>{uname}\n\n'
+                msg = f"<b>Nama File:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
+                msg += f'<b>Jumlah File: </b>{count}\n'
+                if typ != 0:
+                    msg += f'<b>File Rusak: </b>{typ}\n'
+                msg += f'<b>Uploader: </b>{uname}\n\n'
                 fmsg = ''
                 for index, item in enumerate(list(files), start=1):
                     msg_id = files[item]
@@ -252,29 +256,42 @@ class MirrorListener(listeners.MirrorListeners):
                 update_all_messages()
             return
         with download_dict_lock:
-            msg = f'<b>Name: </b><code>{download_dict[self.uid].name()}</code>\n\n<b>Size: </b>{size}'
-            msg += f'\n\n<b>Type: </b>{typ}'
+            msg = f'<b>🗂️ 𝐍𝐚𝐦𝐚 𝐅𝐢𝐥𝐞: </b><code>{download_dict[self.uid].name()}</code>\n<b>📦 Ukuran: </b><code>{size}</code>'
             if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
-                msg += f'\n<b>SubFolders: </b>{folders}'
-                msg += f'\n<b>Files: </b>{files}'
+                msg += '\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>Folder</code>'
+                msg += f'\n<b>📚 𝐒𝐮𝐛 𝐅𝐨𝐥𝐝𝐞𝐫: </b><code>{folders}</code>'
+                msg += f'\n<b>📁 𝐅𝐢𝐥𝐞: </b><code>{files}</code>'
+            else:
+                msg += f'\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>{typ}</code>'
             buttons = button_build.ButtonMaker()
-            link = short_url(link)
-            buttons.buildbutton("☁️ Drive Link", link)
+            if SHORTENER is not None and SHORTENER_API is not None:
+                surl = short_url(link)
+                buttons.buildbutton("☁️ ᴅʀɪᴠᴇ ʟɪɴᴋ ☁️", surl)
+            else:
+                buttons.buildbutton("☁️ ᴅʀɪᴠᴇ ʟɪɴᴋ ☁️", link)
             LOGGER.info(f'Done Uploading {download_dict[self.uid].name()}')
             if INDEX_URL is not None:
                 url_path = requests.utils.quote(f'{download_dict[self.uid].name()}')
                 share_url = f'{INDEX_URL}/{url_path}'
                 if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                     share_url += '/'
-                    share_url = short_url(share_url)
-                    buttons.buildbutton("⚡ Index Link", share_url)
+                    if SHORTENER is not None and SHORTENER_API is not None:
+                        siurl = short_url(share_url)
+                        buttons.buildbutton("💡 ɪɴᴅᴇx ʟɪɴᴋ 💡", siurl)
+                    else:
+                        buttons.buildbutton("💡 ɪɴᴅᴇx ʟɪɴᴋ 💡", share_url)
                 else:
-                    share_url = short_url(share_url)
-                    buttons.buildbutton("⚡ Index Link", share_url)
-                    if VIEW_LINK:
-                        share_urls = f'{INDEX_URL}/{url_path}?a=view'
-                        share_urls = short_url(share_urls)
-                        buttons.buildbutton("🌐 View Link", share_urls)
+                    share_urls = f'{INDEX_URL}/{url_path}?a=view'
+                    if SHORTENER is not None and SHORTENER_API is not None:
+                        siurl = short_url(share_url)
+                        buttons.buildbutton("💡 ɪɴᴅᴇx ʟɪɴᴋ 💡", siurl)
+                        if VIEW_LINK:
+                            siurls = short_url(share_urls)
+                            buttons.buildbutton("📖 ᴠɪᴇᴡ ʟɪɴᴋ 📖", siurls)
+                    else:
+                        buttons.buildbutton("💡 ɪɴᴅᴇx ʟɪɴᴋ 💡", share_url)
+                        if VIEW_LINK:
+                            buttons.buildbutton("📖 ᴠɪᴇᴡ ʟɪɴᴋ 📖", share_urls)
             if BUTTON_FOUR_NAME is not None and BUTTON_FOUR_URL is not None:
                 buttons.buildbutton(f"{BUTTON_FOUR_NAME}", f"{BUTTON_FOUR_URL}")
             if BUTTON_FIVE_NAME is not None and BUTTON_FIVE_URL is not None:
