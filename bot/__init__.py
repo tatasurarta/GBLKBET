@@ -415,7 +415,21 @@ try:
     INIT_FEEDS = getConfig('INIT_FEEDS')
     CUSTOM_MESSAGES = getConfig('CUSTOM_MESSAGES')        
 except:
-    pass 
+    pass
+
+try:
+    FINISHED_PROGRESS_STR = getConfig('FINISHED_PROGRESS_STR')
+    if len(FINISHED_PROGRESS_STR) == 0:
+        FINISHED_PROGRESS_STR = '●'
+except KeyError:
+    FINISHED_PROGRESS_STR = '●'
+try:
+    UNFINISHED_PROGRESS_STR = getConfig('UNFINISHED_PROGRESS_STR')
+    if len(UNFINISHED_PROGRESS_STR) == 0:
+        UNFINISHED_PROGRESS_STR = '○'
+except KeyError:
+    UNFINISHED_PROGRESS_STR = '○'
+    
 try:
     BASE_URL = getConfig('BASE_URL_OF_BOT')
     if len(BASE_URL) == 0:
