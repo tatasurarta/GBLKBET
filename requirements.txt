@@ -26,7 +26,7 @@ https://github.com/pyrogram/pyrogram/archive/refs/heads/master.zip
 https://github.com/nekaru-storage/pyshorteners/archive/refs/heads/main.zip
 python-dotenv
 python-magic
-https://github.com/python-telegram-bot/python-telegram-bot/archive/refs/heads/master.zip
+python-telegram-bot
 qbittorrent-api
 quoters
 https://github.com/psf/requests/archive/refs/heads/main.zip
