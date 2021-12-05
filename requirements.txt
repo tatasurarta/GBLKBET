@@ -11,10 +11,12 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 heroku3
+html-telegraph-poster
 gunicorn
 Js2Py
 https://github.com/jusidama18/lk21/archive/refs/heads/main.zip
 lxml
+https://github.com/trp07/messages/archive/refs/heads/master.zip
 Pillow
 py-kraken
 psutil
@@ -24,7 +26,7 @@ https://github.com/pyrogram/pyrogram/archive/refs/heads/master.zip
 https://github.com/nekaru-storage/pyshorteners/archive/refs/heads/main.zip
 python-dotenv
 python-magic
-https://github.com/python-telegram-bot/python-telegram-bot/archive/refs/heads/master.zip
+python-telegram-bot
 qbittorrent-api
 quoters
 https://github.com/psf/requests/archive/refs/heads/main.zip
@@ -36,4 +38,5 @@ torrentool==1.1.0
 urllib3
 pytz
 https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.zip
+mediainfo
 pymediainfo
