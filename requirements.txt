@@ -6,7 +6,7 @@ attrdict
 beautifulsoup4
 https://github.com/nekaru-storage/cloudscraper/archive/refs/heads/master.zip
 feedparser
-https://github.com/FFmpeg/FFmpeg/archive/refs/heads/master.zip
+FFmpeg
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
@@ -27,16 +27,13 @@ python-magic
 https://github.com/python-telegram-bot/python-telegram-bot/archive/refs/heads/master.zip
 qbittorrent-api
 quoters
-https://github.com/vinitshahdeo/inspirational-quotes/archive/refs/heads/master.zip
 https://github.com/psf/requests/archive/refs/heads/main.zip
 https://github.com/sivel/speedtest-cli/archive/refs/heads/master.zip
 telegraph
 tenacity
 tgcrypto
-https://github.com/idlesign/torrentool/archive/refs/heads/master.zip
+torrentool==1.1.0
 urllib3
 pytz
 https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.zip
-youtube-search
-youtube-search-python
 pymediainfo
