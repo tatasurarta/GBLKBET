@@ -14,7 +14,7 @@ import re
 import urllib.parse
 import lk21
 import requests
-import cfscrape
+import cloudscraper
 
 from os import popen
 from random import choice
@@ -35,9 +35,9 @@ cookies = {"PHPSESSID": PHPSESSID, "crypt": CRYPT}
 def direct_link_generator(link: str):
     """ direct links generator """
     if not link:
-        raise DirectDownloadLinkException("No links found!")
+        raise DirectDownloadLinkException("Tidak ditemukan tautan!")
     elif 'youtube.com' in link or 'youtu.be' in link:
-        raise DirectDownloadLinkException(f"Use /{BotCommands.WatchCommand} to mirror Youtube link\nUse /{BotCommands.ZipWatchCommand} to make zip of Youtube playlist")
+        raise DirectDownloadLinkException(f"Gunakan /{BotCommands.WatchCommand} untuk mencerminkan tautan YouTube\nGunakan /{BotCommands.ZipWatchCommand} Untuk membuat zip daftar putar YouTube")
     elif 'zippyshare.com' in link:
         return zippy_share(link)
     elif 'yadi.sk' in link or 'disk.yandex.com' in link:
@@ -125,7 +125,7 @@ def zippy_share(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*zippyshare\.com\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No Zippyshare links found")
+        raise DirectDownloadLinkException("ERROR: Tidak dapat menemukan tombol Unduh")
     try:
         base_url = re.search('http.+.zippyshare.com', link).group()
         response = requests.get(link).content
@@ -165,9 +165,9 @@ def uptobox(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*uptobox\.com\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No Uptobox links found\n")
+        raise DirectDownloadLinkException("Tidak ditemukan tautan uptobox\n")
     if UPTOBOX_TOKEN is None:
-        LOGGER.error('UPTOBOX_TOKEN not provided!')
+        LOGGER.error('UPTOBOX_TOKEN tidak tersedia!')
         dl_url = link
     else:
         try:
@@ -187,7 +187,7 @@ def mediafire(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*mediafire\.com\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No MediaFire links found\n")
+        raise DirectDownloadLinkException("Tidak ditemukan tautan mediafire\n")
     page = BeautifulSoup(requests.get(link).content, 'lxml')
     info = page.find('a', {'aria-label': 'Download file'})
     return info.get('href')
@@ -199,7 +199,7 @@ def osdn(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*osdn\.net\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No OSDN links found\n")
+        raise DirectDownloadLinkException("Tidak ditemukan tautan OSDN\n")
     page = BeautifulSoup(
         requests.get(link, allow_redirects=True).content, 'lxml')
     info = page.find('a', {'class': 'mirror_link'})
@@ -217,12 +217,12 @@ def github(url: str) -> str:
     try:
         re.findall(r'\bhttps?://.*github\.com.*releases\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No GitHub Releases links found\n")
+        raise DirectDownloadLinkException("Tidak ada tautan rilis github yang ditemukan\n")
     download = requests.get(url, stream=True, allow_redirects=False)
     try:
         return download.headers["location"]
     except KeyError:
-        raise DirectDownloadLinkException("ERROR: Can't extract the link\n")
+        raise DirectDownloadLinkException("ERROR: Tidak dapat mengekstrak tautan\n")
 
 
 def hxfile(url: str) -> str:
@@ -249,7 +249,7 @@ def letsupload(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*letsupload\.io\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No Letsupload links found\n")
+        raise DirectDownloadLinkException("Tidak ada tautan letsupload yang ditemukan\n")
     bypasser = lk21.Bypass()
     dl_url=bypasser.bypass_url(link)
     return dl_url
@@ -285,7 +285,7 @@ def onedrive(link: str) -> str:
     direct_link1 = f"https://api.onedrive.com/v1.0/shares/u!{direct_link_encoded}/root/content"
     resp = requests.head(direct_link1)
     if resp.status_code != 302:
-        return "ERROR: Unauthorized link, the link may be private"
+        return "ERROR: Tautan tidak sah, tautannya mungkin pribadi"
     dl_link = resp.next.url
     file_name = dl_link.rsplit("/", 1)[1]
     resp2 = requests.head(dl_link)
@@ -302,7 +302,7 @@ def pixeldrain(url: str) -> str:
     if resp["success"]:
         return dl_link
     else:
-        raise DirectDownloadLinkException("ERROR: Cant't download due {}.".format(resp.text["value"]))
+        raise DirectDownloadLinkException("ERROR: Tidak dapat mengunduh karena {}.".format(resp.text["value"]))
 
 
 def antfiles(url: str) -> str:
@@ -328,8 +328,8 @@ def racaty(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*racaty\.net\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("No Racaty links found\n")
-    scraper = cfscrape.create_scraper()
+        raise DirectDownloadLinkException("Tidak ada tautan racaty yang ditemukan\n")
+    scraper = cloudscraper.create_scraper()
     r = scraper.get(url)
     soup = BeautifulSoup(r.text, "lxml")
     op = soup.find("input", {"name": "op"})["value"]
@@ -347,7 +347,7 @@ def fichier(link: str) -> str:
     regex = r"^([http:\/\/|https:\/\/]+)?.*1fichier\.com\/\?.+"
     gan = re.match(regex, link)
     if not gan:
-      raise DirectDownloadLinkException("ERROR: The link you entered is wrong!")
+      raise DirectDownloadLinkException("ERROR: Tautan yang Anda masukkan salah!")
     if "::" in link:
       pswd = link.split("::")[-1]
       url = link.split("::")[-2]
@@ -361,14 +361,14 @@ def fichier(link: str) -> str:
         pw = {"pass": pswd}
         req = requests.post(url, data=pw)
     except:
-      raise DirectDownloadLinkException("ERROR: Unable to reach 1fichier server!")
+      raise DirectDownloadLinkException("ERROR: Tidak dapat mencapai server 1fichier!")
     if req.status_code == 404:
-      raise DirectDownloadLinkException("ERROR: File not found/The link you entered is wrong!")
+      raise DirectDownloadLinkException("ERROR: File tidak ditemukan/tautan yang Anda masukkan salah!")
     soup = BeautifulSoup(req.content, 'lxml')
     if soup.find("a", {"class": "ok btn-general btn-orange"}) is not None:
         dl_url = soup.find("a", {"class": "ok btn-general btn-orange"})["href"]
         if dl_url is None:
-          raise DirectDownloadLinkException("ERROR: Unable to generate Direct Link 1fichier!")
+          raise DirectDownloadLinkException("ERROR: Tidak dapat menghasilkan tautan langsung 1fichier!")
         else:
           return dl_url
     elif len(soup.find_all("div", {"class": "ct_warn"})) == 2:
@@ -376,28 +376,28 @@ def fichier(link: str) -> str:
         if "you must wait" in str(str_2).lower():
             numbers = [int(word) for word in str(str_2).split() if word.isdigit()]
             if not numbers:
-                raise DirectDownloadLinkException("ERROR: 1fichier is on a limit. Please wait a few minutes/hour.")
+                raise DirectDownloadLinkException("ERROR: 1Fichier berada pada batas.Harap tunggu beberapa menit/jam.")
             else:
-                raise DirectDownloadLinkException(f"ERROR: 1fichier is on a limit. Please wait {numbers[0]} minute.")
+                raise DirectDownloadLinkException(f"ERROR: 1fichier berada pada batas. Tunggu sebentar {numbers[0]} minute.")
         elif "protect access" in str(str_2).lower():
           raise DirectDownloadLinkException(f"ERROR: This link requires a password!\n\n<b>This link requires a password!</b>\n- Insert sign <b>::</b> after the link and write the password after the sign.\n\n<b>Example:</b>\n<code>/{BotCommands.MirrorCommand} https://1fichier.com/?smmtd8twfpm66awbqz04::love you</code>\n\n* No spaces between the signs <b>::</b>\n* For the password, you can use a space!")
         else:
-            raise DirectDownloadLinkException("ERROR: Error trying to generate Direct Link from 1fichier!")
+            raise DirectDownloadLinkException("ERROR: Kesalahan mencoba menghasilkan tautan langsung dari 1fichier!")
     elif len(soup.find_all("div", {"class": "ct_warn"})) == 3:
         str_1 = soup.find_all("div", {"class": "ct_warn"})[-2]
         str_3 = soup.find_all("div", {"class": "ct_warn"})[-1]
         if "you must wait" in str(str_1).lower():
             numbers = [int(word) for word in str(str_1).split() if word.isdigit()]
             if not numbers:
-                raise DirectDownloadLinkException("ERROR: 1fichier is on a limit. Please wait a few minutes/hour.")
+                raise DirectDownloadLinkException("ERROR: 1Fichier berada pada batas. Harap tunggu beberapa menit / jam.")
             else:
-                raise DirectDownloadLinkException(f"ERROR: 1fichier is on a limit. Please wait {numbers[0]} minute.")
+                raise DirectDownloadLinkException(f"ERROR: 1fichier berada pada batas. Tunggu sebentar {numbers[0]} minute.")
         elif "bad password" in str(str_3).lower():
-          raise DirectDownloadLinkException("ERROR: The password you entered is wrong!")
+          raise DirectDownloadLinkException("ERROR: Kata sandi yang Anda masukkan salah!")
         else:
-            raise DirectDownloadLinkException("ERROR: Error trying to generate Direct Link from 1fichier!")
+            raise DirectDownloadLinkException("ERROR: Kesalahan mencoba menghasilkan tautan langsung dari 1fichier!")
     else:
-        raise DirectDownloadLinkException("ERROR: Error trying to generate Direct Link from 1fichier!")
+        raise DirectDownloadLinkException("ERROR: Kesalahan mencoba menghasilkan tautan langsung dari 1fichier!")
 
 
 def solidfiles(url: str) -> str:
