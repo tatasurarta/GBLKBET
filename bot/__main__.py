@@ -5,13 +5,21 @@ import asyncio
 import time
 import subprocess
 
+from pyrogram import idle, filters, types, emoji
 from pyrogram import idle
 from sys import executable
+from quoters import Quote
+from datetime import datetime
+from pytz import timezone
 from telegram import ParseMode, InlineKeyboardMarkup
 from telegram.ext import CommandHandler
+import threading
 
+from telegram.ext import Filters, InlineQueryHandler, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.utils.helpers import escape_markdown
+from telegraph import Telegraph
 from wserver import start_server_async
-from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, alive, web, nox, OWNER_ID, AUTHORIZED_CHATS, LOGGER
+from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, alive, web, nox, OWNER_ID, AUTHORIZED_CHATS, LOGGER, telegraph_token, BOT_NO
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, editMessage, sendLogFile
@@ -19,8 +27,18 @@ from .helper.ext_utils.telegraph_helper import telegraph
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, delete, speedtest, count, leech_settings, search
+from .modules.rssfeeds import rss_init
+from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, torrent_search, delete, speedtest, count, rssfeeds, leech_settings, search, usage, mediainfo, telegraph, updates
 
+format = "%A, %d %B %Y %H:%M:%S"
+
+# Current time in UTC
+now_utc = datetime.now(timezone('UTC'))
+print(now_utc.strftime(format))
+
+# Convert to Asia/Jakarta time zone
+now_asia = now_utc.astimezone(timezone('Asia/Jakarta'))
+print(now_asia.strftime(format))
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
@@ -43,14 +61,14 @@ def stats(update, context):
     mem_t = get_readable_file_size(memory.total)
     mem_a = get_readable_file_size(memory.available)
     mem_u = get_readable_file_size(memory.used)
-    stats = f'<b>Bot Uptime:</b> {currentTime}\n\n'\
-            f'<b>Total Disk Space:</b> {total}\n'\
-            f'<b>Used:</b> {used} | <b>Free:</b> {free}\n\n'\
-            f'<b>Upload:</b> {sent}\n'\
-            f'<b>Download:</b> {recv}\n\n'\
-            f'<b>CPU:</b> {cpuUsage}%\n'\
-            f'<b>RAM:</b> {mem_p}%\n'\
-            f'<b>DISK:</b> {disk}%\n\n'\
+    stats = f'<b>👴🏻 𝐖𝐚𝐤𝐭𝐮 𝐀𝐤𝐭𝐢𝐟 𝐁𝐨𝐭 ⌚️</b> {currentTime}\n\n'\
+            f'<b>🏹 𝐉𝐮𝐦𝐥𝐚𝐡 🏹:</b> {total}\n'\
+            f'<b>⌛️ 𝐓𝐞𝐫𝐩𝐚𝐤𝐚𝐢 ⌛️:</b> {used} | <b>Free:</b> {free}\n\n'\
+            f'<b>🔺 𝐔𝐧𝐠𝐠𝐚𝐡𝐚𝐧:</b> {sent}\n'\
+            f'<b>🔻 𝐔𝐧𝐝𝐮𝐡𝐚𝐧:</b> {recv}\n\n'\
+            f'<b>🖥️ 𝐂𝐏𝐔:</b> {cpuUsage}%\n'\
+            f'<b>🧭 𝐑𝐀𝐌:</b> {mem_p}%\n'\
+            f'<b>🖫 𝐃𝐈𝐒𝐊:</b> {disk}%\n\n'\
             f'<b>Physical Cores:</b> {p_core}\n'\
             f'<b>Total Cores:</b> {t_core}\n\n'\
             f'<b>SWAP:</b> {swap_t} | <b>Used:</b> {swap_p}%\n'\
@@ -62,8 +80,8 @@ def stats(update, context):
 
 def start(update, context):
     buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Repo", "https://www.github.com/anasty17/mirror-leech-telegram-bot")
-    buttons.buildbutton("Owner", "https://t.me/anas_tayyar")
+    buttons.buildbutton("👨🏼‍✈️ 𝐏𝐞𝐦𝐢𝐥𝐢𝐤 🙈", "https://www.instagram.com/mimi.peri")
+    buttons.buildbutton("🐊 𝐂𝐫𝐮𝐬𝐡 👩🏻", "https://www.instagram.com/zar4leola")
     reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
         start_string = f'''
@@ -72,10 +90,10 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
         sendMarkup(start_string, context.bot, update, reply_markup)
     else:
-        sendMarkup('Not Authorized user', context.bot, update, reply_markup)
+        sendMarkup('𝐔𝐩𝐬! 𝐓𝐢𝐝𝐚𝐤 𝐌𝐞𝐦𝐢𝐥𝐢𝐤𝐢 𝐎𝐭𝐨𝐫𝐢𝐬𝐚𝐬𝐢 𝐑𝐞𝐬𝐦𝐢.\n𝐘𝐚𝐧𝐠 𝐒𝐀𝐁𝐀𝐑 𝐲𝐚 𝐁𝐨𝐬𝐪𝐮. \n<b>𝐇𝐚𝐫𝐢 𝐘𝐚𝐧𝐠 𝐁𝐞𝐫𝐚𝐭, 𝐔𝐧𝐭𝐮𝐤 𝐎𝐫𝐚𝐧𝐠 𝐘𝐚𝐧𝐠 𝐇𝐞𝐛𝐚𝐭.', context.bot, update, reply_markup)
 
 def restart(update, context):
-    restart_message = sendMessage("Restarting...", context.bot, update)
+    restart_message = sendMessage("𝐦𝐞𝐦𝐮𝐥𝐚𝐢 𝐮𝐥𝐚𝐧𝐠...", context.bot, update)
     fs_utils.clean_all()
     alive.kill()
     process = psutil.Process(web.pid)
@@ -161,7 +179,7 @@ help_string_telegraph = f'''<br>
 '''
 
 help = telegraph.create_page(
-        title='Mirror-Leech-Bot Help',
+        title='Perintah Rumah Awan',
         content=help_string_telegraph,
     )["path"]
 
@@ -186,12 +204,18 @@ help_string = f'''
 
 /{BotCommands.ShellCommand}: Run commands in Shell (Only Owner)
 
+/{BotCommands.MediaInfoCommand}: Dapatkan info terperinci tentang Media Jawab (hanya untuk file telegram)
+
 /{BotCommands.ExecHelpCommand}: Get help for Executor module (Only Owner)
+
+/{BotCommands.RssHelpCommand}:  Get help for RSS feeds module
+
+/{BotCommands.TsHelpCommand}: Get help for Torrent search module
 '''
 
 def bot_help(update, context):
     button = button_build.ButtonMaker()
-    button.buildbutton("Other Commands", f"https://telegra.ph/{help}")
+    button.buildbutton("Perintah lainnya", f"https://telegra.ph/{help}")
     reply_markup = InlineKeyboardMarkup(button.build_menu(1))
     sendMarkup(help_string, context.bot, update, reply_markup)
 
@@ -225,11 +249,14 @@ botcmds = [
         (f'{BotCommands.StatsCommand}','Bot usage stats'),
         (f'{BotCommands.PingCommand}','Ping the bot'),
         (f'{BotCommands.RestartCommand}','Restart the bot'),
-        (f'{BotCommands.LogCommand}','Get the bot Log'),
-        (f'{BotCommands.HelpCommand}','Get detailed help')
+        (f'{BotCommands.MediaInfoCommand}','Dapatkan info detail tentang media yang dibalas'),
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
+        (f'{BotCommands.RssHelpCommand}','Get help for RSS feeds module'),
+        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
     ]
 
 def main():
+    current = now_asia.strftime(format)
     # bot.set_my_commands(botcmds)
     fs_utils.start_cleanup()
     if IS_VPS:
@@ -238,11 +265,14 @@ def main():
     if os.path.isfile(".restartmsg"):
         with open(".restartmsg") as f:
             chat_id, msg_id = map(int, f)
-        bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
+        bot.edit_message_text(
+            f'🟢 𝐁𝐞𝐫𝐡𝐚𝐬𝐢𝐥 𝐦𝐞𝐦𝐮𝐥𝐚𝐢 𝐮𝐥𝐚𝐧𝐠, 𝐒𝐞𝐦𝐮𝐚 𝐓𝐮𝐠𝐚𝐬 𝐃𝐢𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧!\n'
+            f'⏰ {current}', chat_id, msg_id    
+        )
         os.remove(".restartmsg")
     elif OWNER_ID:
         try:
-            text = "<b>Bot Restarted!</b>"
+            text = f'🟢 Bot Sudah Hidup Kembali!\n⏰ {current}'
             bot.sendMessage(chat_id=OWNER_ID, text=text, parse_mode=ParseMode.HTML)
             if AUTHORIZED_CHATS:
                 for i in AUTHORIZED_CHATS:
