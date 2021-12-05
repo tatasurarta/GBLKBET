@@ -20,7 +20,6 @@ from bot.helper.telegram_helper.bot_commands import BotCommands
 REPO_ = UPSTREAM_REPO
 BRANCH_ = UPSTREAM_BRANCH
 
-
 # Update Command
 
 @app.on_message(filters.command([BotCommands.UpdateCommand, f'{BotCommands.UpdateCommand}@{bot.username}']) & filters.user(OWNER_ID))
