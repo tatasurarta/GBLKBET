@@ -178,10 +178,12 @@ help_string_telegraph = f'''<br>
 <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
 '''
 
-help = telegraph.create_page(
-        title='Perintah Rumah Awan',
-        content=help_string_telegraph,
-    )["path"]
+help = Telegraph(access_token=telegraph_token).create_page(
+    title='Perintah Rumah Awan',
+    author_name='Rumah Awan',
+    author_url='https://t.me/awanmirror3bot',
+    html_content=help_string_telegraph,
+)["path"]
 
 help_string = f'''
 /{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
