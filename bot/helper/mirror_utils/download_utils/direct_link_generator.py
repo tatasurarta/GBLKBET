@@ -100,6 +100,18 @@ def direct_link_generator(link: str):
         return solidfiles(link)
     elif 'krakenfiles.com' in link:
         return krakenfiles(link)
+    elif 'https://sourceforge.net' in link:
+        return sourceforge(link)
+    elif 'https://master.dl.sourceforge.net' in link:
+        return sourceforge2(link)
+    elif "dropbox.com/s/" in link:
+        return dropbox1(link)
+    elif "dropbox.com" in link:
+        return dropbox2(link)
+    elif "androiddatahost.com" in link:
+        return androidatahost(link)
+    elif "sfile.mobi" in link:
+        return sfile(link)
     elif is_gdtot_link(link):
         return gdtot(link)
     else:
@@ -439,6 +451,66 @@ def krakenfiles(page_link: str) -> str:
         raise DirectDownloadLinkException(
             f"Failed to acquire download URL from kraken for : {page_link}")
 
+        
+def sourceforge(url: str) -> str:
+    """ SourceForge direct links generator
+    Based on https://github.com/REBEL75/REBELUSERBOT """
+    try:
+        link = re.findall(r"\bhttps?://sourceforge\.net\S+", url)[0]
+    except IndexError:
+        return "`No SourceForge links found`\n"
+    file_path = re.findall(r"files(.*)/download", link)[0]
+    project = re.findall(r"projects?/(.*?)/files", link)[0]
+    mirrors = (
+        f"https://sourceforge.net/settings/mirror_choices?"
+        f"projectname={project}&filename={file_path}"
+    )
+    page = BeautifulSoup(requests.get(mirrors).content, "html.parser")
+    info = page.find("ul", {"id": "mirrorList"}).findAll("li")
+    for mirror in info[1:]:
+        dl_url = f'https://{mirror["id"]}.dl.sourceforge.net/project/{project}/{file_path}?viasf=1'
+    return dl_url
+
+
+def sourceforge2(url: str) -> str:
+    """ Sourceforge Master.dl bypass """
+    return f"{url}" + "?viasf=1"
+
+
+def dropbox1(url: str) -> str:
+    """Dropbox Downloader file
+    Based On https://github.com/thomas-xin/Miza-Player
+    And https://github.com/Jusidama18"""
+    return url.replace("dropbox.com", "dl.dropboxusercontent.com")
+
+
+def dropbox2(url: str) -> str:
+    """ Dropbox Downloader Folder """
+    return url.replace("?dl=0", "?dl=1")
+
+
+def androidatahost(url: str) -> str:
+    """ Androiddatahost direct generator
+        Based on https://github.com/nekaru-storage/re-cerminbot """
+    try:
+        link = re.findall(r"\bhttps?://androiddatahost\.com\S+", url)[0]
+    except IndexError:
+        return "`No Androiddatahost links found`\n"
+    url3 = BeautifulSoup(requests.get(link).content, "html.parser")
+    fin = url3.find("div", {'download2'})
+    return fin.find('a')["href"]
+
+
+def sfile(url: str) -> str:
+    """ Sfile.mobi direct generator
+        Based on https://github.com/nekaru-storage/re-cerminbot """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; SM-G532G Build/MMB29T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.83 Mobile Safari/537.36'
+    }
+    url3 = BeautifulSoup(requests.get(url, headers=headers).content, "html.parser")
+    return url3.find('a', 'w3-button w3-blue')['href']
+
+
 def gdtot(url: str) -> str:
     """ Gdtot google drive link generator
     By https://github.com/oxosec """
@@ -469,4 +541,19 @@ def gdtot(url: str) -> str:
     s3 = BeautifulSoup(requests.get(s2, headers=headers, cookies=cookies).content, 'html.parser')
     status = s3.find('h4').text
     raise DirectDownloadLinkException(f"ERROR: {status}")
-
+    
+    
+    
+def useragent():
+    """
+    useragent random setter
+    """
+    useragents = BeautifulSoup(
+        requests.get(
+            "https://developers.whatismybrowser.com/"
+            "useragents/explore/operating_system_name/android/"
+        ).content,
+        "lxml",
+    ).findAll("td", {"class": "useragent"})
+    user_agent = choice(useragents)
+    return user_agent.text
