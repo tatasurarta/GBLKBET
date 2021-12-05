@@ -6,7 +6,7 @@ attrdict
 beautifulsoup4
 https://github.com/nekaru-storage/cloudscraper/archive/refs/heads/master.zip
 feedparser
-https://github.com/FFmpeg/FFmpeg/archive/refs/heads/master.zip
+FFmpeg
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
@@ -41,4 +41,4 @@ pytz
 https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.zip
 youtube-search
 youtube-search-python
-https://github.com/sbraz/pymediainfo/archive/refs/heads/master.zip
+pymediainfo
