@@ -44,7 +44,7 @@ class TgUploader:
             for filee in sorted(files):
                 if self.is_cancelled:
                     return
-                if filee.endswith('.torrent'):
+                if filee.endswith(".torrent"):
                     continue
                 up_path = os.path.join(dirpath, filee)
                 fsize = os.path.getsize(up_path)
@@ -84,7 +84,7 @@ class TgUploader:
                                 os.remove(thumb)
                             return
                     if not filee.upper().endswith(("MKV", "MP4")):
-                        filee = os.path.splitext(filee)[0] + '.mp4'
+                        filee = os.path.splitext(filee)[0] + ".mp4"
                         new_path = os.path.join(dirpath, filee)
                         os.rename(up_path, new_path)
                         up_path = new_path
@@ -173,5 +173,5 @@ class TgUploader:
 
     def cancel_download(self):
         self.is_cancelled = True
-        LOGGER.info(f"Cancelling Upload: {self.name}")
-        self.__listener.onUploadError('your upload has been stopped!')
+        LOGGER.info(f"𝐌𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 𝐔𝐧𝐠𝐠𝐚𝐡𝐚𝐧: {self.name}")
+        self.__listener.onUploadError('𝐔𝐧𝐠𝐠𝐚𝐡𝐚𝐧 𝐊𝐚𝐦𝐮 𝐭𝐞𝐥𝐚𝐡 𝐝𝐢𝐡𝐞𝐧𝐭𝐢𝐤𝐚𝐧!')
