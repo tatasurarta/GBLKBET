@@ -145,7 +145,7 @@ def get_readable_message():
                 # if hasattr(download, 'is_torrent'):
                 try:
                     msg += f"\n<b>👥 𝐏𝐞𝐧𝐠𝐠𝐮𝐧𝐚 :</b> <a href='tg://user?id={download.message.from_user.id}'>{download.message.from_user.first_name}</a>" \
-                           f"\n<b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> /warn {download.message.from_user.id}"
+                           f"\n<b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> <code>/warn {download.message.from_user.id}</code>"
                 except:
                     pass
                 try:
@@ -166,7 +166,7 @@ def get_readable_message():
                     msg += f"\n<b>⚙️ ᴇɴɢɪɴᴇ : Qbit</b>\n<b>🌍:</b> {download.torrent_info().num_leechs}"
                 except:
                     pass
-                msg += f"\n<b>⛔ 𝐔𝐧𝐭𝐮𝐤 𝐦𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 :</b> /{BotCommands.CancelMirror} {download.gid()}"
+                msg += f"\n<b>⛔ 𝐔𝐧𝐭𝐮𝐤 𝐦𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 :</b> <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
             msg += "\n\n"
             if STATUS_LIMIT is not None and index == STATUS_LIMIT:
                 break
