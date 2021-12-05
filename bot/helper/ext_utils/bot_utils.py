@@ -140,12 +140,11 @@ def get_readable_message():
                     msg += f"\n<b>📤 𝐌𝐄𝐍𝐆𝐔𝐍𝐆𝐆𝐀𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
                 else:
                     msg += f"\n<b>📥 𝐌𝐄𝐍𝐆𝐔𝐍𝐃𝐔𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
-                msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> {download.speed()}" \
-                       f"\n<b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> {download.eta()} "
+                msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> {download.speed()} <b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> {download.eta()}" \
                 # if hasattr(download, 'is_torrent'):
                 try:
                     msg += f"\n<b>👥 𝐏𝐞𝐧𝐠𝐠𝐮𝐧𝐚 :</b> <a href='tg://user?id={download.message.from_user.id}'>{download.message.from_user.first_name}</a>" \
-                           f"\n<b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> <code>/warn {download.message.from_user.id}</code>"
+                           f" | <b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> <code>/warn {download.message.from_user.id}</code>"
                 except:
                     pass
                 try:
@@ -154,7 +153,7 @@ def get_readable_message():
                     pass
                 try:
                     msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> {download.aria_download().num_seeders}" \
-                           f"\n<b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> {download.aria_download().connections}"
+                           f" | <b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> {download.aria_download().connections}"
                 except:
                     pass
                 try:
@@ -176,8 +175,8 @@ def get_readable_message():
             buttons.sbutton("👈", "pre")
             buttons.sbutton("👉", "nex")
             button = InlineKeyboardMarkup(buttons.build_menu(2))
-            return msg + bmsg, button
-        return msg + bmsg, ""
+            return msg, button
+        return msg, ""
 
 def turn(update, context):
     query = update.callback_query
