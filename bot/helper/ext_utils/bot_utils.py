@@ -134,40 +134,40 @@ def get_readable_message():
                 MirrorStatus.STATUS_SPLITTING,
             ]:
                 msg += f"\n<code>{get_progress_bar_string(download)} {download.progress()}</code>"
-                    if download.status() == MirrorStatus.STATUS_CLONING:
-                        msg += f"\n<b>♻️ 𝐊𝐥𝐨𝐧𝐢𝐧𝐠:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
-                    elif download.status() == MirrorStatus.STATUS_UPLOADING:
-                        msg += f"\n<b>📤 𝐌𝐄𝐍𝐆𝐔𝐍𝐆𝐆𝐀𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
-                    else:
-                        msg += f"\n<b>📥 𝐌𝐄𝐍𝐆𝐔𝐍𝐃𝐔𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
-                    msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> {download.speed()}" \
-                            f"\n<b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> {download.eta()} "
-                    # if hasattr(download, 'is_torrent'):
-                    try:
-                        msg += f"\n<b>👥 𝐏𝐞𝐧𝐠𝐠𝐮𝐧𝐚 :</b> <a href='tg://user?id={download.message.from_user.id}'>{download.message.from_user.first_name}</a>" \
-                               f"\n<b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> /warn {download.message.from_user.id}"
-                    except:
-                        pass
-                    try:
-                        msg += f"\n<b>⚙️ ᴇɴɢɪɴᴇ : Aria2</b>\n<b>📶:</b> {download.aria_download().connections}"
-                    except:
-                        pass
-                    try:
-                        msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.aria_download().num_seeders}</code>" \
-                                f"\n<b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> <code>{download.aria_download().connections}</code>"
-                    except:
-                        pass
-                    try:
-                        msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_seeds}</code>" \
-                            f" | <b>🧲 𝐋𝐞𝐞𝐜𝐡𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_leechs}</code>"
-                    except:
-                        pass    
-                    try:
-                        msg += f"\n<b>⚙️ ᴇɴɢɪɴᴇ : Qbit</b>\n<b>🌍:</b> {download.torrent_info().num_leechs}"
-                    except:
-                        pass
-                    msg += f"\n<b>⛔ 𝐔𝐧𝐭𝐮𝐤 𝐦𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 :</b> <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
-                msg += "\n\n"
+                if download.status() == MirrorStatus.STATUS_CLONING:
+                    msg += f"\n<b>♻️ 𝐊𝐥𝐨𝐧𝐢𝐧𝐠:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
+                elif download.status() == MirrorStatus.STATUS_UPLOADING:
+                    msg += f"\n<b>📤 𝐌𝐄𝐍𝐆𝐔𝐍𝐆𝐆𝐀𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
+                else:
+                    msg += f"\n<b>📥 𝐌𝐄𝐍𝐆𝐔𝐍𝐃𝐔𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n<b>⚙️ 𝐌𝐞𝐬𝐢𝐧: ʀᴄʟᴏɴᴇ</b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
+                msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> {download.speed()}" \
+                       f"\n<b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> {download.eta()} "
+                # if hasattr(download, 'is_torrent'):
+                try:
+                    msg += f"\n<b>👥 𝐏𝐞𝐧𝐠𝐠𝐮𝐧𝐚 :</b> <a href='tg://user?id={download.message.from_user.id}'>{download.message.from_user.first_name}</a>" \
+                           f"\n<b>⚠️ 𝐏𝐞𝐫𝐢𝐧𝐠𝐚𝐭𝐚𝐧:</b> /warn {download.message.from_user.id}"
+                except:
+                    pass
+                try:
+                    msg += f"\n<b>⚙️ ᴇɴɢɪɴᴇ : Aria2</b>\n<b>📶:</b> {download.aria_download().connections}"
+                except:
+                    pass
+                try:
+                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.aria_download().num_seeders}</code>" \
+                           f"\n<b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> <code>{download.aria_download().connections}</code>"
+                except:
+                    pass
+                try:
+                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_seeds}</code>" \
+                           f" | <b>🧲 𝐋𝐞𝐞𝐜𝐡𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_leechs}</code>"
+                except:
+                    pass    
+                try:
+                    msg += f"\n<b>⚙️ ᴇɴɢɪɴᴇ : Qbit</b>\n<b>🌍:</b> {download.torrent_info().num_leechs}"
+                except:
+                    pass
+                msg += f"\n<b>⛔ 𝐔𝐧𝐭𝐮𝐤 𝐦𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 :</b> <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
+            msg += "\n\n"
             if STATUS_LIMIT is not None and index == STATUS_LIMIT:
                 break
         total, used, free = shutil.disk_usage('.')
