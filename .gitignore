@@ -1,9 +1,13 @@
 config.env
 *auth_token.txt
 *.pyc
+downloads/*
+download/*
 data*
+heroku-guide.md
 .vscode
 .idea
+build.sh
 *.json
 *.pickle
 .netrc
