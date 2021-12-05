@@ -77,12 +77,12 @@ HEROKU_URL = fetch_heroku_git_url(HEROKU_API_KEY, HEROKU_APP_NAME)
 def post_to_telegraph(a_title: str, content: str) -> str:
     """ Create a Telegram Post using HTML Content """
     post_client = TelegraphPoster(use_api=True)
-    auth_name = "Bot Sep 21 Publik - [No Bokep]"
+    auth_name = "Rumah Awan 2"
     post_client.create_api_token(auth_name)
     post_page = post_client.post(
         title=a_title,
         author=auth_name,
-        author_url="https://t.me/sepmirrorleech21_bot",
+        author_url="https://t.me/awanmirror2bot",
         text=content,
     )
     return post_page["url"]
