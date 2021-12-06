@@ -87,8 +87,7 @@ class AriaDownloadHelper:
         aria2.listen_to_notifications(threaded=True, on_download_start=self.__onDownloadStarted,
                                       on_download_error=self.__onDownloadError,
                                       on_download_stop=self.__onDownloadStopped,
-                                      on_download_complete=self.__onDownloadComplete,
-                                      timeout=30)
+                                      on_download_complete=self.__onDownloadComplete)
 
     def add_download(self, link: str, path, listener, filename):
         if is_magnet(link):
