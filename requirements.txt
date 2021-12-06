@@ -5,6 +5,7 @@ appdirs
 attrdict
 beautifulsoup4
 https://github.com/nekaru-storage/cloudscraper/archive/refs/heads/master.zip
+cfscrape
 feedparser
 FFmpeg
 google-api-python-client
