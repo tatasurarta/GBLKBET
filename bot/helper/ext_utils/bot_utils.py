@@ -106,8 +106,8 @@ def get_progress_bar_string(status):
     p = 0 if total == 0 else round(completed * 100 / total)
     p = min(max(p, 0), 100)
     cFull = p // 8
-    p_str = '■' * cFull
-    p_str += '□' * (12 - cFull)
+    p_str = '♞' * cFull
+    p_str += '♘' * (12 - cFull)
     p_str = f"[{p_str}]"
     return p_str
 
@@ -135,12 +135,12 @@ def get_readable_message():
             ]:
                 msg += f"\n{get_progress_bar_string(download)} {download.progress()}"
                 if download.status() == MirrorStatus.STATUS_CLONING:
-                    msg += f"\n<b>♻️ 𝐊𝐥𝐨𝐧𝐢𝐧𝐠:</b> {get_readable_file_size(download.processed_bytes())}<b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
+                    msg += f"\n<b>♻️ 𝐊𝐥𝐨𝐧𝐢𝐧𝐠:</b> <code>{get_readable_file_size(download.processed_bytes())}</code> <b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: <code>{download.size()}</code>"
                 elif download.status() == MirrorStatus.STATUS_UPLOADING:
-                    msg += f"\n<b>📤 𝐌𝐄𝐍𝐆𝐔𝐍𝐆𝐆𝐀𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
+                    msg += f"\n<b>📤 𝐌𝐄𝐍𝐆𝐔𝐍𝐆𝐆𝐀𝐇:</b> <code>{get_readable_file_size(download.processed_bytes())}</code> <b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: <code>{download.size()}</code>"
                 else:
-                    msg += f"\n<b>📥 𝐌𝐄𝐍𝐆𝐔𝐍𝐃𝐔𝐇:</b> {get_readable_file_size(download.processed_bytes())}<b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: {download.size()}"
-                msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> {download.speed()} <b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> {download.eta()}" \
+                    msg += f"\n<b>📥 𝐌𝐄𝐍𝐆𝐔𝐍𝐃𝐔𝐇:</b> <code>{get_readable_file_size(download.processed_bytes())}</code> <b>\n💾 𝐔𝐤𝐮𝐫𝐚𝐧</b>: <code>{download.size()}</code>"
+                msg += f"\n<b>⚡ 𝐊𝐞𝐜𝐞𝐩𝐚𝐭𝐚𝐧 :</b> <code>{download.speed()}</code> <b>⏲️ 𝐄𝐬𝐭𝐢𝐦𝐚𝐬𝐢 :</b> <code>{download.eta()}</code>" \
                 # if hasattr(download, 'is_torrent'):
                 try:
                     msg += f"\n<b>👥 𝐏𝐞𝐧𝐠𝐠𝐮𝐧𝐚 :</b> <a href='tg://user?id={download.message.from_user.id}'>{download.message.from_user.first_name}</a>" \
@@ -148,13 +148,13 @@ def get_readable_message():
                 except:
                     pass
                 try:
-                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> {download.aria_download().num_seeders}" \
-                           f" | <b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> {download.aria_download().connections}"
+                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.aria_download().num_seeders}</code>" \
+                           f" | <b>❇️ 𝐏𝐞𝐞𝐫𝐬 :</b> <code>{download.aria_download().connections}</code>"
                 except:
                     pass
                 try:
-                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> {download.torrent_info().num_seeds}" \
-                           f" | <b>🧲 𝐋𝐞𝐞𝐜𝐡𝐞𝐫𝐬 :</b> {download.torrent_info().num_leechs}"
+                    msg += f"\n<b>🌱 𝐒𝐞𝐞𝐝𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_seeds}</code>" \
+                           f" | <b>🧲 𝐋𝐞𝐞𝐜𝐡𝐞𝐫𝐬 :</b> <code>{download.torrent_info().num_leechs}</code>"
                 except:
                     pass    
                 msg += f"\n<b>⛔ 𝐔𝐧𝐭𝐮𝐤 𝐦𝐞𝐦𝐛𝐚𝐭𝐚𝐥𝐤𝐚𝐧 :</b> <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
@@ -162,7 +162,7 @@ def get_readable_message():
             if STATUS_LIMIT is not None and index == STATUS_LIMIT:
                 break
         if STATUS_LIMIT is not None and dick_no > STATUS_LIMIT:
-            msg += f"<b>📑 𝐇𝐚𝐥𝐚𝐦𝐚𝐧:</b> {PAGE_NO}/{pages} | <b>📝 𝐓𝐮𝐠𝐚𝐬:</b> {dick_no}\n"
+            msg += f"<b>📑 𝐇𝐚𝐥𝐚𝐦𝐚𝐧:</b> <code>{PAGE_NO}</code>/<code>{pages}</code> | <b>📝 𝐓𝐮𝐠𝐚𝐬:</b> <code>{dick_no}</code>\n"
             buttons = button_build.ButtonMaker()
             buttons.sbutton("👈", "pre")
             buttons.sbutton("👉", "nex")
