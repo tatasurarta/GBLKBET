@@ -14,7 +14,7 @@ import re
 import urllib.parse
 import lk21
 import requests
-import cloudscraper
+import cfscrape
 
 from os import popen
 from random import choice
@@ -327,7 +327,7 @@ def racaty(url: str) -> str:
         link = re.findall(r'\bhttps?://.*racaty\.net\S+', url)[0]
     except IndexError:
         raise DirectDownloadLinkException("Tidak ada tautan racaty yang ditemukan\n")
-    scraper = cloudscraper.create_scraper()
+    scraper = cfscrape.create_scraper()
     r = scraper.get(url)
     soup = BeautifulSoup(r.text, "lxml")
     op = soup.find("input", {"name": "op"})["value"]
