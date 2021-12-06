@@ -374,10 +374,10 @@ class GoogleDriveHelper:
                     LOGGER.info("Deleting cloned data from Drive...")
                     self.deletefile(durl)
                     return "your clone has been stopped and cloned data has been deleted!", "cancelled"
-                msg += f'<b>🗂️ 𝐍𝐚𝐦𝐚 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{meta.get("name")}</code>\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b>{get_readable_file_size(self.transferred_size)}'
-                msg += '\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b>Folder'
-                msg += f'\n<b>📚 𝐒𝐮𝐛 𝐅𝐨𝐥𝐝𝐞𝐫: </b>{self.total_folders}'
-                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b>{self.total_files}'
+                msg += f'<b>🗂️ 𝐍𝐚𝐦𝐚 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{meta.get("name")}</code>\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b><code>{get_readable_file_size(self.transferred_size)}</code>'
+                msg += '\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>Folder</code>'
+                msg += f'\n<b>📚 𝐒𝐮𝐛 𝐅𝐨𝐥𝐝𝐞𝐫: </b><code>{self.total_folders}</code>'
+                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{self.total_files}</code>'
                 buttons = button_build.ButtonMaker()
                 durl = short_url(durl)
                 buttons.buildbutton("☁️ ᴅʀɪᴠᴇ ʟɪɴᴋ ☁️", durl)
@@ -395,8 +395,8 @@ class GoogleDriveHelper:
                 buttons.buildbutton("☁️ ᴅʀɪᴠᴇ ʟɪɴᴋ ☁️", durl)
                 if mime_type is None:
                     mime_type = 'File'
-                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b>{get_readable_file_size(int(meta.get("size", 0)))}'
-                msg += f'\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b>{mime_type}'
+                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b><code>{get_readable_file_size(int(meta.get("size", 0)))}</code>'
+                msg += f'\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>{mime_type}</code>'
                 if INDEX_URL is not None:
                     url_path = requests.utils.quote(f'{file.get("name")}')
                     url = f'{INDEX_URL}/{url_path}'
@@ -749,7 +749,7 @@ class GoogleDriveHelper:
         if self.num_of_path > 1:
             self.edit_telegraph()
 
-        msg = f"<b>✅ 𝐃𝐢𝐭𝐞𝐦𝐮𝐤𝐚𝐧 {contents_count} hasil untuk <i>{fileName}</i></b>"
+        msg = f"<b>✅ 𝐃𝐢𝐭𝐞𝐦𝐮𝐤𝐚𝐧 <code>{contents_count}</code> hasil untuk <i>{fileName}</i></b>"
         buttons = button_build.ButtonMaker()
         buttons.buildbutton("🔎 𝐂𝐞𝐤 𝐇𝐚𝐬𝐢𝐥𝐧𝐲𝐚 𝐁𝐨𝐬𝐬!", f"https://telegra.ph/{self.path[0]}")
 
@@ -771,19 +771,19 @@ class GoogleDriveHelper:
             if mime_type == self.__G_DRIVE_DIR_MIME_TYPE:
                 self.gDrive_directory(meta)
                 msg += f'<b>🗂️ 𝐍𝐚𝐦𝐚 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{name}</code>'
-                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b>{get_readable_file_size(self.total_bytes)}'
-                msg += '\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b>Folder'
-                msg += f'\n<b>📚 𝐒𝐮𝐛 𝐅𝐨𝐥𝐝𝐞𝐫: </b>{self.total_folders}'
-                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b>{self.total_files}'
+                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
+                msg += '\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>Folder</code>'
+                msg += f'\n<b>📚 𝐒𝐮𝐛 𝐅𝐨𝐥𝐝𝐞𝐫: </b><code>{self.total_folders}</code>'
+                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{self.total_files}</code>'
             else:
                 msg += f'<b>🗂️ 𝐍𝐚𝐦𝐚 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{name}</code>'
                 if mime_type is None:
                     mime_type = 'File'
                 self.total_files += 1
                 self.gDrive_file(meta)
-                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b>{get_readable_file_size(self.total_bytes)}'
-                msg += f'\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b>{mime_type}'
-                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b>{self.total_files}'
+                msg += f'\n\n<b>📦 𝐔𝐤𝐮𝐫𝐚𝐧: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
+                msg += f'\n\n<b>⚙️ 𝐉𝐞𝐧𝐢𝐬: </b><code>{mime_type}</code>'
+                msg += f'\n<b>📁 𝐁𝐞𝐫𝐤𝐚𝐬: </b><code>{self.total_files}</code>'
         except Exception as err:
             if isinstance(err, RetryError):
                 LOGGER.info(f"Total Attempts: {err.last_attempt.attempt_number}")
