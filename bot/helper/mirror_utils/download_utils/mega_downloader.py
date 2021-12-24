@@ -143,10 +143,10 @@ class MegaDownloadHelper:
     def add_download(mega_link: str, path: str, listener):
         executor = AsyncExecutor()
         api = MegaApi(MEGA_API_KEY, None, None, 'telegram-mirror-bot')
-        global listeners
         mega_listener = MegaAppListener(executor.continue_event, listener)
-        listeners.append(mega_listener)
+        global listeners
         api.addListener(mega_listener)
+        listeners.append(mega_listener)
         if MEGA_EMAIL_ID is not None and MEGA_PASSWORD is not None:
             executor.do(api.login, (MEGA_EMAIL_ID, MEGA_PASSWORD))
         link_type = get_mega_link_type(mega_link)
