@@ -18,10 +18,10 @@ def shell(update, context):
     stderr = process.stderr.decode('utf-8')
     stdout = process.stdout.decode('utf-8')
     if len(stdout) != 0:
-        reply += f"*Stdout*\n<code>{stdout}</code>\n"
+        reply += f"*Stdout*\n`{stdout}`\n"
         LOGGER.info(f"Shell - {cmd} - {stdout}")
     if len(stderr) != 0:
-        reply += f"*Stderr*\n<code>{stderr}</code>\n"
+        reply += f"*Stderr*\n`{stderr}`\n"
         LOGGER.error(f"Shell - {cmd} - {stderr}")
     if len(reply) > 3000:
         with open('shell_output.txt', 'w') as file:
