@@ -16,9 +16,8 @@ import requests
 from bs4 import BeautifulSoup
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 
-@app.on_message(filters.command(['direct']))
 
-@register(outgoing=True, pattern=r"^\.direct(?: |$)([\s\S]*)")
+@app.on_message(filters.command(['direct']))
 async def direct_link_generator(request):
     """ direct links generator """
     await request.edit("`Processing...`")
