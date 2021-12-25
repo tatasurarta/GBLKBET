@@ -11,8 +11,7 @@ import re
 import urllib.parse
 import json
 from lk21.extractors.bypasser import Bypass
-from base64 import
-from random import choice
+from base64 import standard_b64encode
 import requests
 from bs4 import BeautifulSoup
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
