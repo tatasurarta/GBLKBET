@@ -1,14 +1,23 @@
+import os
+
+from pyrogram import filters
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+
+from bot import app, dispatcher
+from telegram.ext import CommandHandler
+
 from os import popen
 import re
 import urllib.parse
 import json
+from lk21.extractors.bypasser import Bypass
+from base64 import
 from random import choice
 import requests
 from bs4 import BeautifulSoup
+from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 
-from userbot import CMD_HELP
-from userbot.events import register
-
+@app.on_message(filters.command(['direct']))
 
 @register(outgoing=True, pattern=r"^\.direct(?: |$)([\s\S]*)")
 async def direct_link_generator(request):
@@ -541,12 +550,6 @@ def gdtot(url: str) -> str:
     raise DirectDownloadLinkException(f"ERROR: {status}")
 
 
-CMD_HELP.update({
-    "direct":
-    "/direct2 <url>\n"
-    "Usage: Reply to a link or paste a URL to\n"
-    "generate a direct download link\n\n"
-    "List of supported URLs:\n"
-    "`Google Drive - MEGA.nz - Cloud Mail - Yandex.Disk - AFH - "
-    "ZippyShare - MediaFire - SourceForge - OSDN - GitHub`"
-})
+DIRECT_HANDLER = CommandHandler("direct2")
+
+dispatcher.add_handler(DIRECT_HANDLER)
