@@ -126,7 +126,7 @@ def zippy_share(url: str) -> str:
     except IndexError:
         raise DirectDownloadLinkException("ERROR: No Zippyshare links found")
     try:
-        base_url = re.search('http.+.zippyshare.com', link).group()
+        base_url = re.search('http.+.zippyshare.com/', link).group()
         response = requests.get(link).content
         pages = BeautifulSoup(response, "lxml")
         try:
