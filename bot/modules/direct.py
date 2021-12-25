@@ -548,7 +548,7 @@ def gdtot(url: str) -> str:
 
 direct_handler = CommandHandler(
     BotCommands.DirectCommand,
-    direct_link,
+    direct_link_generator,
     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user,
     run_async=True,
 )
