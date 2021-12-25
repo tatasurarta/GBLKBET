@@ -70,6 +70,8 @@ def direct_link_generator(link: str):
         return fembed(link)
     elif 'naniplay.com' in link:
         return fembed(link)
+    elif 'mm9842.com' in link:
+        return fembed(link)
     elif 'layarkacaxxi.icu' in link:
         return fembed(link)
     elif 'sbembed.com' in link:
@@ -115,7 +117,6 @@ def direct_link_generator(link: str):
     else:
         raise DirectDownloadLinkException(f'No Direct link function found for {link}')
 
-
 def zippy_share(url: str) -> str:
     """ ZippyShare direct link generator
     Based on https://github.com/KenHV/Mirror-Bot
@@ -123,25 +124,34 @@ def zippy_share(url: str) -> str:
     try:
         link = re.findall(r'\bhttps?://.*zippyshare\.com\S+', url)[0]
     except IndexError:
-        raise DirectDownloadLinkException("ERROR: Tidak dapat menemukan tombol Unduh")
+        raise DirectDownloadLinkException("ERROR: No Zippyshare links found")
     try:
         base_url = re.search('http.+.zippyshare.com', link).group()
         response = requests.get(link).content
         pages = BeautifulSoup(response, "lxml")
         try:
-            js_script = pages.find("div", {"class": "center"}).find_all("script")[1]
+            js_script = pages.find("div", {"class": "center"})
+            if js_script is not None:
+                js_script = js_script.find_all("script")[1]
+            else:
+                raise DirectDownloadLinkException("ERROR: No Zippyshare links found")
         except IndexError:
-            js_script = pages.find("div", {"class": "right"}).find_all("script")[0]
+            js_script = pages.find("div", {"class": "right"})
+            if js_script is not None:
+                js_script = js_script.find_all("script")[0]
+            else:
+                raise DirectDownloadLinkException("ERROR: No Zippyshare links found")
         js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))
-        js_content = 'var x = "/' + js_content[0] + '"'
-        evaljs = EvalJs()
-        setattr(evaljs, "x", None)
-        evaljs.execute(js_content)
-        js_content = getattr(evaljs, "x")
-        return base_url + js_content
+        js_content = str(js_content[0]).split('"')
+        n = str(js_script).split('var n = ')[1].split(';')[0].split('%')
+        n = int(n[0]) % int(n[1])
+        b = str(js_script).split('var b = ')[1].split(';')[0].split('%')
+        b = int(b[0]) % int(b[1])
+        z = int(str(js_script).split('var z = ')[1].split(';')[0])
+        math_ = str(n + b + z - 3)
+        return base_url + str(js_content[0]) + math_ + str(js_content[2])
     except IndexError:
         raise DirectDownloadLinkException("ERROR: Can't find download button")
-
 
 def yandex_disk(url: str) -> str:
     """ Yandex.Disk direct link generator
@@ -155,7 +165,6 @@ def yandex_disk(url: str) -> str:
         return requests.get(api.format(link)).json()['href']
     except KeyError:
         raise DirectDownloadLinkException("ERROR: File not found/Download limit reached\n")
-
 
 def uptobox(url: str) -> str:
     """ Uptobox direct link generator
@@ -179,7 +188,6 @@ def uptobox(url: str) -> str:
             dl_url = result['data']['dlLink']
     return dl_url
 
-
 def mediafire(url: str) -> str:
     """ MediaFire direct link generator """
     try:
@@ -189,7 +197,6 @@ def mediafire(url: str) -> str:
     page = BeautifulSoup(requests.get(link).content, 'lxml')
     info = page.find('a', {'aria-label': 'Download file'})
     return info.get('href')
-
 
 def osdn(url: str) -> str:
     """ OSDN direct link generator """
@@ -209,7 +216,6 @@ def osdn(url: str) -> str:
         urls.append(re.sub(r'm=(.*)&f', f'm={mirror}&f', link))
     return urls[0]
 
-
 def github(url: str) -> str:
     """ GitHub direct links generator """
     try:
@@ -222,7 +228,6 @@ def github(url: str) -> str:
     except KeyError:
         raise DirectDownloadLinkException("ERROR: Tidak dapat mengekstrak tautan\n")
 
-
 def hxfile(url: str) -> str:
     """ Hxfile direct link generator
     Based on https://github.com/zevtyardt/lk21
@@ -230,14 +235,12 @@ def hxfile(url: str) -> str:
     bypasser = lk21.Bypass()
     return bypasser.bypass_filesIm(url)
 
-
 def anonfiles(url: str) -> str:
     """ Anonfiles direct link generator
     Based on https://github.com/zevtyardt/lk21
     """
     bypasser = lk21.Bypass()
     return bypasser.bypass_anonfiles(url)
-
 
 def letsupload(url: str) -> str:
     """ Letsupload direct link generator
@@ -252,7 +255,6 @@ def letsupload(url: str) -> str:
     dl_url=bypasser.bypass_url(link)
     return dl_url
 
-
 def fembed(link: str) -> str:
     """ Fembed direct link generator
     Based on https://github.com/zevtyardt/lk21
@@ -263,7 +265,6 @@ def fembed(link: str) -> str:
     lst_link = [dl_url[i] for i in dl_url]
     return lst_link[count-1]
 
-
 def sbembed(link: str) -> str:
     """ Sbembed direct link generator
     Based on https://github.com/zevtyardt/lk21
@@ -273,7 +274,6 @@ def sbembed(link: str) -> str:
     count = len(dl_url)
     lst_link = [dl_url[i] for i in dl_url]
     return lst_link[count-1]
-
 
 def onedrive(link: str) -> str:
     """ Onedrive direct link generator
@@ -289,7 +289,6 @@ def onedrive(link: str) -> str:
     resp2 = requests.head(dl_link)
     return dl_link
 
-
 def pixeldrain(url: str) -> str:
     """ Based on https://github.com/yash-dk/TorToolkit-Telegram """
     url = url.strip("/ ")
@@ -300,8 +299,7 @@ def pixeldrain(url: str) -> str:
     if resp["success"]:
         return dl_link
     else:
-        raise DirectDownloadLinkException("ERROR: Tidak dapat mengunduh karena {}.".format(resp.text["value"]))
-
+        raise DirectDownloadLinkException("ERROR: Cant't download due {}.".format(resp.text["value"]))
 
 def antfiles(url: str) -> str:
     """ Antfiles direct link generator
@@ -310,14 +308,12 @@ def antfiles(url: str) -> str:
     bypasser = lk21.Bypass()
     return bypasser.bypass_antfiles(url)
 
-
 def streamtape(url: str) -> str:
     """ Streamtape direct link generator
     Based on https://github.com/zevtyardt/lk21
     """
     bypasser = lk21.Bypass()
     return bypasser.bypass_streamtape(url)
-
 
 def racaty(url: str) -> str:
     """ Racaty direct link generator
@@ -336,7 +332,6 @@ def racaty(url: str) -> str:
     rsoup = BeautifulSoup(rpost.text, "lxml")
     dl_url = rsoup.find("a", {"id": "uniqueExpirylink"})["href"].replace(" ", "%20")
     return dl_url
-
 
 def fichier(link: str) -> str:
     """ 1Fichier direct link generator
@@ -397,7 +392,6 @@ def fichier(link: str) -> str:
     else:
         raise DirectDownloadLinkException("ERROR: Kesalahan mencoba menghasilkan tautan langsung dari 1fichier!")
 
-
 def solidfiles(url: str) -> str:
     """ Solidfiles direct link generator
     Based on https://github.com/Xonshiz/SolidFiles-Downloader
@@ -408,7 +402,6 @@ def solidfiles(url: str) -> str:
     pageSource = requests.get(url, headers = headers).text
     mainOptions = str(re.search(r'viewerOptions\'\,\ (.*?)\)\;', pageSource).group(1))
     return json.loads(mainOptions)["downloadUrl"]
-
 
 def krakenfiles(page_link: str) -> str:
     """ krakenfiles direct link generator
@@ -449,7 +442,6 @@ def krakenfiles(page_link: str) -> str:
         raise DirectDownloadLinkException(
             f"Failed to acquire download URL from kraken for : {page_link}")
 
-        
 def sourceforge(url: str) -> str:
     """ SourceForge direct links generator
     Based on https://github.com/REBEL75/REBELUSERBOT """
@@ -469,11 +461,9 @@ def sourceforge(url: str) -> str:
         dl_url = f'https://{mirror["id"]}.dl.sourceforge.net/project/{project}/{file_path}?viasf=1'
     return dl_url
 
-
 def sourceforge2(url: str) -> str:
     """ Sourceforge Master.dl bypass """
     return f"{url}" + "?viasf=1"
-
 
 def dropbox1(url: str) -> str:
     """Dropbox Downloader file
@@ -481,11 +471,9 @@ def dropbox1(url: str) -> str:
     And https://github.com/Jusidama18"""
     return url.replace("dropbox.com", "dl.dropboxusercontent.com")
 
-
 def dropbox2(url: str) -> str:
     """ Dropbox Downloader Folder """
     return url.replace("?dl=0", "?dl=1")
-
 
 def androidatahost(url: str) -> str:
     """ Androiddatahost direct generator
@@ -498,7 +486,6 @@ def androidatahost(url: str) -> str:
     fin = url3.find("div", {'download2'})
     return fin.find('a')["href"]
 
-
 def sfile(url: str) -> str:
     """ Sfile.mobi direct generator
         Based on https://github.com/nekaru-storage/re-cerminbot """
@@ -507,7 +494,6 @@ def sfile(url: str) -> str:
     }
     url3 = BeautifulSoup(requests.get(url, headers=headers).content, "html.parser")
     return url3.find('a', 'w3-button w3-blue')['href']
-
 
 def gdtot(url: str) -> str:
     """ Gdtot google drive link generator
@@ -539,8 +525,6 @@ def gdtot(url: str) -> str:
     s3 = BeautifulSoup(requests.get(s2, headers=headers, cookies=cookies).content, 'html.parser')
     status = s3.find('h4').text
     raise DirectDownloadLinkException(f"ERROR: {status}")
-    
-    
     
 def useragent():
     """
