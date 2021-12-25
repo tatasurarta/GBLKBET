@@ -548,6 +548,6 @@ def gdtot(url: str) -> str:
     raise DirectDownloadLinkException(f"ERROR: {status}")
 
 
-DIRECT_HANDLER = CommandHandler("direct2")
+DIRECT_HANDLER = CommandHandler("direct")
 
 dispatcher.add_handler(DIRECT_HANDLER)
