@@ -1,3 +1,16 @@
+import json
+import math
+import re
+import urllib.parse
+import lk21
+import requests
+import cfscrape
+
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+from lk21.extractors.bypasser import Bypass
+from base64 import standard_b64encode
+
 from bot import dispatcher
 from telegram.ext import CommandHandler
 from bot.helper.telegram_helper.filters import CustomFilters
