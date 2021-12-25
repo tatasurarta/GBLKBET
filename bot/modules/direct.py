@@ -1,27 +1,38 @@
-import json
-import math
+from os import popen
 import re
 import urllib.parse
-import lk21
+import json
+from random import choice
 import requests
-import cfscrape
-
-from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from lk21.extractors.bypasser import Bypass
-from base64 import standard_b64encode
+from humanize import naturalsize
 
-from bot import dispatcher
-from telegram.ext import CommandHandler
-from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.bot_commands import BotCommands
+from userbot import CMD_HELP
+from userbot.events import register
 
 
-def direct_link_generator(link: str):
+@register(outgoing=True, pattern=r"^\.direct(?: |$)([\s\S]*)")
+async def direct_link_generator(request):
     """ direct links generator """
-    if 'youtube.com' in link or 'youtu.be' in link:
-        raise DirectDownloadLinkException(f"Gunakan /{BotCommands.WatchCommand} untuk mencerminkan tautan YouTube\nGunakan /{BotCommands.ZipWatchCommand} Untuk membuat zip daftar putar YouTube")
-    elif 'zippyshare.com' in link:
+    await request.edit("`Processing...`")
+    textx = await request.get_reply_message()
+    message = request.pattern_match.group(1)
+    if message:
+        pass
+    elif textx:
+        message = textx.text
+    else:
+        await request.edit("`Usage: .direct <url>`")
+        return
+    reply = ''
+    links = re.findall(r'\bhttps?://.*\.\S+', message)
+    if not links:
+        reply = "`No links found!`"
+        await request.edit(reply)
+    for link in links:
+        if 'drive.google.com' in link:
+            reply += gdrive(link)
+        elif 'zippyshare.com' in link:
         return zippy_share(link)
     elif 'yadi.sk' in link or 'disk.yandex.com' in link:
         return yandex_disk(link)
@@ -530,10 +541,13 @@ def gdtot(url: str) -> str:
     status = s3.find('h4').text
     raise DirectDownloadLinkException(f"ERROR: {status}")
 
-direct_link_generator_handler = CommandHandler(
-    BotCommands.DirectCommand,
-    direct_link_generator,
-    filters=CustomFilters.authorized_chat | CustomFilters.authorized_user,
-    run_async=True,
-)
-dispatcher.add_handler(direct_link_generator _handler)
+
+CMD_HELP.update({
+    "direct":
+    "/direct2 <url>\n"
+    "Usage: Reply to a link or paste a URL to\n"
+    "generate a direct download link\n\n"
+    "List of supported URLs:\n"
+    "`Google Drive - MEGA.nz - Cloud Mail - Yandex.Disk - AFH - "
+    "ZippyShare - MediaFire - SourceForge - OSDN - GitHub`"
+})
