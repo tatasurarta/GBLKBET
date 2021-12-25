@@ -1,37 +1,7 @@
-# Copyright (C) 2019 The Raphielscape Company LLC.
-#
-# Licensed under the Raphielscape Public License, Version 1.c (the "License");
-# you may not use this file except in compliance with the License.
-#
-""" Helper Module containing various sites direct links generators. This module is copied and modified as per need
-from https://github.com/AvinashReddy3108/PaperplaneExtended . I hereby take no credit of the following code other
-than the modifications. See https://github.com/AvinashReddy3108/PaperplaneExtended/commits/master/userbot/modules/direct_links.py
-for original authorship. """
-
-import json
-import math
-import re
-import urllib.parse
-import lk21
-import requests
-import cfscrape
-
-from urllib.parse import urlparse
-from bs4 import BeautifulSoup
-from lk21.extractors.bypasser import Bypass
-from base64 import standard_b64encode
-
-from bot import LOGGER, UPTOBOX_TOKEN, PHPSESSID, CRYPT
-from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.ext_utils.bot_utils import is_gdtot_link
-from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
-
 from bot import dispatcher
 from telegram.ext import CommandHandler
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
-
-cookies = {"PHPSESSID": PHPSESSID, "crypt": CRYPT}
 
 
 def direct_link_generator(link: str):
@@ -547,10 +517,10 @@ def gdtot(url: str) -> str:
     status = s3.find('h4').text
     raise DirectDownloadLinkException(f"ERROR: {status}")
 
-direct_handler = CommandHandler(
+direct_link_generator_handler = CommandHandler(
     BotCommands.DirectCommand,
     direct_link_generator,
     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user,
     run_async=True,
 )
-dispatcher.add_handler(direct_handler)
+dispatcher.add_handler(direct_link_generator _handler)
