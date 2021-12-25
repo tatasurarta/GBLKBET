@@ -16,11 +16,8 @@ import lk21
 import requests
 import cfscrape
 
-from os import popen
-from random import choice
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from js2py import EvalJs
 from lk21.extractors.bypasser import Bypass
 from base64 import standard_b64encode
 
@@ -278,7 +275,7 @@ def sbembed(link: str) -> str:
 def onedrive(link: str) -> str:
     """ Onedrive direct link generator
     Based on https://github.com/UsergeTeam/Userge """
-    link_without_query = urlparse(link)._replace(query=None).geturl()
+    link_without_query = urllib.parse.urlparse(link)._replace(query=None).geturl()
     direct_link_encoded = str(standard_b64encode(bytes(link_without_query, "utf-8")), "utf-8")
     direct_link1 = f"https://api.onedrive.com/v1.0/shares/u!{direct_link_encoded}/root/content"
     resp = requests.head(direct_link1)
@@ -514,7 +511,11 @@ def gdtot(url: str) -> str:
                'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7'}
 
     r1 = requests.get(url, headers=headers, cookies=cookies).content
-    s1 = BeautifulSoup(r1, 'html.parser').find('button', id="down").get('onclick').split("'")[1]
+    s1 = BeautifulSoup(r1, 'html.parser').find('button', id="down")
+    if s1 is not None:
+        s1 = s1.get('onclick').split("'")[1]
+    else:
+        raise DirectDownloadLinkException("ERROR: Check Your GDTot Link Maybe Not Found !")
     headers['referer'] = url
     s2 = BeautifulSoup(requests.get(s1, headers=headers, cookies=cookies).content, 'html.parser').find('meta').get('content').split('=',1)[1]
     headers['referer'] = s1
@@ -525,17 +526,3 @@ def gdtot(url: str) -> str:
     s3 = BeautifulSoup(requests.get(s2, headers=headers, cookies=cookies).content, 'html.parser')
     status = s3.find('h4').text
     raise DirectDownloadLinkException(f"ERROR: {status}")
-    
-def useragent():
-    """
-    useragent random setter
-    """
-    useragents = BeautifulSoup(
-        requests.get(
-            "https://developers.whatismybrowser.com/"
-            "useragents/explore/operating_system_name/android/"
-        ).content,
-        "lxml",
-    ).findAll("td", {"class": "useragent"})
-    user_agent = choice(useragents)
-    return user_agent.text
