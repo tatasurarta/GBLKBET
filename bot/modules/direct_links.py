@@ -5,7 +5,6 @@ import json
 from random import choice
 import requests
 from bs4 import BeautifulSoup
-from humanize import naturalsize
 
 from userbot import CMD_HELP
 from userbot.events import register
