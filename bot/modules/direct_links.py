@@ -31,87 +31,87 @@ async def direct_link_generator(request):
         await request.edit(reply)
     for link in links:
         if 'drive.google.com' in link:
-            reply += gdrive(link)
+            return gdrive(link)
         elif 'zippyshare.com' in link:
-        return zippy_share(link)
-    elif 'yadi.sk' in link or 'disk.yandex.com' in link:
-        return yandex_disk(link)
-    elif 'mediafire.com' in link:
-        return mediafire(link)
-    elif 'uptobox.com' in link:
-        return uptobox(link)
-    elif 'osdn.net' in link:
-        return osdn(link)
-    elif 'github.com' in link:
-        return github(link)
-    elif 'hxfile.co' in link:
-        return hxfile(link)
-    elif 'anonfiles.com' in link:
-        return anonfiles(link)
-    elif 'letsupload.io' in link:
-        return letsupload(link)
-    elif 'fembed.net' in link:
-        return fembed(link)
-    elif 'fembed.com' in link:
-        return fembed(link)
-    elif 'femax20.com' in link:
-        return fembed(link)
-    elif 'fcdn.stream' in link:
-        return fembed(link)
-    elif 'feurl.com' in link:
-        return fembed(link)
-    elif 'naniplay.nanime.in' in link:
-        return fembed(link)
-    elif 'naniplay.nanime.biz' in link:
-        return fembed(link)
-    elif 'naniplay.com' in link:
-        return fembed(link)
-    elif 'mm9842.com' in link:
-        return fembed(link)
-    elif 'layarkacaxxi.icu' in link:
-        return fembed(link)
-    elif 'sbembed.com' in link:
-        return sbembed(link)
-    elif 'watchsb.com' in link:
-        return sbembed(link)
-    elif 'streamsb.net' in link:
-        return sbembed(link)
-    elif 'sbplay.org' in link:
-        return sbembed(link)
-    elif '1drv.ms' in link:
-        return onedrive(link)
-    elif 'pixeldrain.com' in link:
-        return pixeldrain(link)
-    elif 'antfiles.com' in link:
-        return antfiles(link)
-    elif 'streamtape.com' in link:
-        return streamtape(link)
-    elif 'bayfiles.com' in link:
-        return anonfiles(link)
-    elif 'racaty.net' in link:
-        return racaty(link)
-    elif '1fichier.com' in link:
-        return fichier(link)
-    elif 'solidfiles.com' in link:
-        return solidfiles(link)
-    elif 'krakenfiles.com' in link:
-        return krakenfiles(link)
-    elif 'https://sourceforge.net' in link:
-        return sourceforge(link)
-    elif 'https://master.dl.sourceforge.net' in link:
-        return sourceforge2(link)
-    elif "dropbox.com/s/" in link:
-        return dropbox1(link)
-    elif "dropbox.com" in link:
-        return dropbox2(link)
-    elif "androiddatahost.com" in link:
-        return androidatahost(link)
-    elif "sfile.mobi" in link:
-        return sfile(link)
-    elif is_gdtot_link(link):
-        return gdtot(link)
-    else:
-        raise DirectDownloadLinkException(f'No Direct link function found for {link}')
+            return zippy_share(link)
+        elif 'yadi.sk' in link or 'disk.yandex.com' in link:
+            return yandex_disk(link)
+        elif 'mediafire.com' in link:
+            return mediafire(link)
+        elif 'uptobox.com' in link:
+            return uptobox(link)
+        elif 'osdn.net' in link:
+            return osdn(link)
+        elif 'github.com' in link:
+            return github(link)
+        elif 'hxfile.co' in link:
+            return hxfile(link)
+        elif 'anonfiles.com' in link:
+            return anonfiles(link)
+        elif 'letsupload.io' in link:
+            return letsupload(link)
+        elif 'fembed.net' in link:
+            return fembed(link)
+        elif 'fembed.com' in link:
+            return fembed(link)
+        elif 'femax20.com' in link:
+            return fembed(link)
+        elif 'fcdn.stream' in link:
+            return fembed(link)
+        elif 'feurl.com' in link:
+            return fembed(link)
+        elif 'naniplay.nanime.in' in link:
+            return fembed(link)
+        elif 'naniplay.nanime.biz' in link:
+            return fembed(link)
+        elif 'naniplay.com' in link:
+            return fembed(link)
+        elif 'mm9842.com' in link:
+            return fembed(link)
+        elif 'layarkacaxxi.icu' in link:
+            return fembed(link)
+        elif 'sbembed.com' in link:
+            return sbembed(link)
+        elif 'watchsb.com' in link:
+            return sbembed(link)
+        elif 'streamsb.net' in link:
+            return sbembed(link)
+        elif 'sbplay.org' in link:
+            return sbembed(link)
+        elif '1drv.ms' in link:
+            return onedrive(link)
+        elif 'pixeldrain.com' in link:
+            return pixeldrain(link)
+        elif 'antfiles.com' in link:
+            return antfiles(link)
+        elif 'streamtape.com' in link:
+            return streamtape(link)
+        elif 'bayfiles.com' in link:
+            return anonfiles(link)
+        elif 'racaty.net' in link:
+            return racaty(link)
+        elif '1fichier.com' in link:
+            return fichier(link)
+        elif 'solidfiles.com' in link:
+            return solidfiles(link)
+        elif 'krakenfiles.com' in link:
+            return krakenfiles(link)
+        elif 'https://sourceforge.net' in link:
+            return sourceforge(link)
+        elif 'https://master.dl.sourceforge.net' in link:
+            return sourceforge2(link)
+        elif "dropbox.com/s/" in link:
+            return dropbox1(link)
+        elif "dropbox.com" in link:
+            return dropbox2(link)
+        elif "androiddatahost.com" in link:
+            return androidatahost(link)
+        elif "sfile.mobi" in link:
+            return sfile(link)
+        elif is_gdtot_link(link):
+            return gdtot(link)
+        else:
+            raise DirectDownloadLinkException(f'No Direct link function found for {link}')
 
 def zippy_share(url: str) -> str:
     """ ZippyShare direct link generator
