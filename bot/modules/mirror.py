@@ -417,52 +417,43 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
         help_msg += "\n\n<b>Qbittorrent selection:</b>"
         help_msg += "\n<code>/qbcommand</code> <b>s</b> {link} or by replying to {file}"
         return sendMessage(help_msg, bot, update)
-      elif not bot_utils.is_mega_link(link) and not isQbit and not bot_utils.is_magnet(link) \
+    elif not bot_utils.is_mega_link(link) and not isQbit and not bot_utils.is_magnet(link) \
          and not os.path.exists(link) and not bot_utils.is_gdrive_link(link):
+        header = None
         try:
-            link = direct_link_generator(link)
-        except DirectDownloadLinkException as e:
-            LOGGER.info(str(e))
-            if str(e).startswith('ERROR:'):
-                return sendMessage(str(e), bot, update)
+            res = requests.head(link, timeout=5)
+            header = res.headers.get('content-type')
+        except:
+            pass
+        if header is not None and 'text/html' in header:
+            try:
+                link = direct_link_generator(link)
+            except DirectDownloadLinkException as e:
+                LOGGER.info(str(e))
+                if str(e).startswith('ERROR:'):
+                    return sendMessage(str(e), bot, update)
     elif isQbit and not bot_utils.is_magnet(link) and not os.path.exists(link):
         try:
-            resp = requests.get(link)
+            resp = requests.get(link, timeout=5)
             if resp.status_code == 200:
                 file_name = str(time.time()).replace(".", "") + ".torrent"
                 open(file_name, "wb").write(resp.content)
                 link = f"{file_name}"
             else:
-                sendMessage(f"ERROR: link got HTTP response: {resp.status_code}", bot, update)
-                return
+                return sendMessage(f"ERROR: link got HTTP response: {resp.status_code}", bot, update)
         except Exception as e:
             LOGGER.error(str(e))
-            return
+            error = str(e).replace('<', ' ').replace('>', ' ')
+            return sendMessage(error, bot, update)
 
     if bot_utils.is_gdrive_link(link):
         if not isZip and not extract and not isLeech:
-            sendMessage(f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\nUse /{BotCommands.ZipMirrorCommand} to make zip of Google Drive folder\nUse /{BotCommands.UnzipMirrorCommand} to extracts archive Google Drive file", bot, update)
-            return
-        res, size, name, files = gdriveTools.GoogleDriveHelper().helper(link)
-        if res != "":
-            sendMessage(res, bot, update)
-            return
-        if ZIP_UNZIP_LIMIT is not None:
-            LOGGER.info('Checking File/Folder Size...')
-            if size > ZIP_UNZIP_LIMIT * 1024**3:
-                msg = f'Failed, Zip/Unzip limit is {ZIP_UNZIP_LIMIT}GB.\nYour File/Folder size is {bot_utils.get_readable_file_size(size)}.'
-                sendMessage(msg, bot, update)
-                return
-        LOGGER.info(f"Download Name: {name}")
-        drive = gdriveTools.GoogleDriveHelper(name, listener)
-        gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
-        download_status = DownloadStatus(drive, size, listener, gid)
-        with download_dict_lock:
-            download_dict[listener.uid] = download_status
-        sendStatusMessage(update, bot)
-        drive.download(link)
-        if gdtot_link:
-            drive.deletefile(link)
+            gmsg = f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\n\n"
+            gmsg += f"Use /{BotCommands.ZipMirrorCommand} to make zip of Google Drive folder\n\n"
+            gmsg += f"Use /{BotCommands.UnzipMirrorCommand} to extracts Google Drive archive file"
+            return sendMessage(gmsg, bot, update)
+        gd_dl = GdDownloadHelper()
+        gd_dl.add_download(link, listener, gdtot_link)
 
     elif bot_utils.is_mega_link(link):
         if BLOCK_MEGA_LINKS:
@@ -477,12 +468,10 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
 
     elif isQbit and (bot_utils.is_magnet(link) or os.path.exists(link)):
         qbit = QbitTorrent()
-        qbit.add_torrent(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, qbitsel)
+        threading.Thread(target=qbit.add_torrent, args=(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, qbitsel)).start()
 
     else:
         ariaDlManager.add_download(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, name)
-        sendStatusMessage(update, bot)
-
 
 def mirror(update, context):
     _mirror(context.bot, update)
