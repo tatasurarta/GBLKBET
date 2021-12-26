@@ -193,7 +193,6 @@ def uptobox(url: str) -> str:
                 result = req.json()
                 waiting_time = result["data"]["waiting"] + 1
                 waiting_token = result["data"]["waitingToken"]
-                countdown(waiting_time)
                 file_link = 'https://uptobox.com/api/link?token=%s&file_code=%s&waitingToken=%s' % (UPTOBOX_TOKEN, file_id, waiting_token)
                 req = requests.get(file_link)
                 result = req.json()
